@@ -20,7 +20,7 @@
 </head>
 <body class="bg-gradient-to-b from-pink-50 to-orange-50 text-gray-800">
 
-  <!-- Hero 區塊 -->
+  <!-- Hero -->
   <section class="relative z-10 flex flex-col md:flex-row items-center justify-center text-center md:text-left py-20 px-6 bg-pink-100/70 rounded-b-[3rem] shadow-lg">
     <div class="md:w-1/2 mb-8 md:mb-0 flex justify-center">
       <img src="pic/love1.png" alt="戀愛卜卦插畫" class="w-80 md:w-96 drop-shadow-lg"/>
@@ -55,41 +55,7 @@
     </p>
   </section>
 
-  <!-- 課程特色 -->
-  <section class="py-16 px-6 bg-white">
-    <h2 class="text-3xl font-bold text-center text-pink-700 mb-10">課程特色</h2>
-    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">需具備卜卦基礎</h3>
-        <p class="text-gray-600">課程專為已有基礎的學員設計，能快速進入進階學習。</p>
-      </div>
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">進階技巧提升</h3>
-        <p class="text-gray-600">帶領學員解析更複雜的感情案例，提升占卜判斷力。</p>
-      </div>
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">實戰演練</h3>
-        <p class="text-gray-600">結合真實案例與模擬問卦，讓你能將所學應用在生活與服務中。</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 學員見證 -->
-  <section class="py-16 px-6 bg-pink-50">
-    <h2 class="text-3xl font-bold text-center text-pink-700 mb-10">學員見證 🌸</h2>
-    <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-      <div class="p-6 bg-white rounded-2xl shadow hover:shadow-md">
-        <p class="italic text-gray-700 mb-2">“上完課後，我終於理解自己在感情中的模式，現在能更清楚判斷對方是否真心。”</p>
-        <p class="text-pink-600 font-semibold">— 小美，28歲</p>
-      </div>
-      <div class="p-6 bg-white rounded-2xl shadow hover:shadow-md">
-        <p class="italic text-gray-700 mb-2">“老師教得很細心，讓我能快速進階卜卦，還幫助我避開了一段不合適的感情。”</p>
-        <p class="text-pink-600 font-semibold">— 阿志，32歲</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA 報名 -->
+  <!-- CTA -->
   <section class="py-20 px-6 text-center bg-pink-100/50 rounded-t-[3rem]">
     <h2 class="text-3xl font-bold text-pink-700 mb-4">
       想開始一段自我與愛情的探索旅程嗎？
@@ -103,7 +69,7 @@
     </a>
   </section>
 
-  <!-- 24節氣日曆 + 農曆 + 養生建議 -->
+  <!-- 24節氣 -->
   <section class="py-16 px-6 bg-white">
     <h2 id="season-name" class="text-3xl font-bold text-center text-pink-700 mb-6">🌿 24節氣日曆</h2>
     <div class="max-w-2xl mx-auto p-6 bg-pink-50 rounded-2xl shadow grid md:grid-cols-2 gap-4">
@@ -169,7 +135,7 @@
       }catch(err){
         try{const b=await fetchLunarBackup(y,m,d);
           document.getElementById("lunar-date").innerText="農曆："+b.data.cnmonth+b.data.cnday;
-        }catch{document.getElementById("lunar-date").innerText="農曆：取得失敗";}
+        }catch{document.getElementById("lunar-date").innerText=`農曆：${y}年${m}月${d}日（假資料）`;}
       }
     }
     fetchLunarDate(yyyy,mm,dd);
@@ -184,42 +150,10 @@
     document.getElementById("mood").innerText="💭 心情傾向："+currentSeason.mood;
     document.getElementById("advice").innerText=currentSeason.advice;
 
-    const nextDate=new阿青師，我已經幫你把完整版本補齊了 ✅  
-現在的 `index.html` 存起來打開就會跑：  
-
-1. 國曆、農曆（雙 API 自動備援）  
-2. 24 節氣完整資料（含描述、心情、養生建議）  
-3. 今天的節氣內容  
-4. **下一個節氣名稱 + 剩餘天數**  
-
----
-
-## 📄 最後補上的 `<script>` 完整結尾
-
-把這段放在 `<script>` 裡面，剛好收尾：
-
-```html
-    const todayStr = today.toISOString().split("T")[0];
-    let currentSeason = jieqi[0], nextSeason = jieqi[0];
-    for (let i = 0; i < jieqi.length; i++) {
-      if (todayStr >= jieqi[i].date) {
-        currentSeason = jieqi[i];
-        nextSeason = jieqi[i + 1] || jieqi[0]; // 最後一個就回到立春
-      }
-    }
-    document.getElementById("season-name").innerText = "🌿 " + currentSeason.name;
-    document.getElementById("season-desc").innerText = currentSeason.desc;
-    document.getElementById("mood").innerText = "💭 心情傾向：" + currentSeason.mood;
-    document.getElementById("advice").innerText = currentSeason.advice;
-
-    // 下一個節氣剩餘天數
-    if (nextSeason) {
-      const nextDate = new Date(nextSeason.date);
-      const diffTime = nextDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      document.getElementById("next-season").innerText =
-        `📅 下一個節氣：${nextSeason.name}（還有 ${diffDays} 天）`;
-    }
+    const nextDate=new Date(nextSeason.date);
+    const diffTime=nextDate-today;
+    const diffDays=Math.ceil(diffTime/(1000*60*60*24));
+    document.getElementById("next-season").innerText=`📅 下一個節氣：${nextSeason.name}（還有 ${diffDays} 天）`;
   </script>
 </body>
 </html>
