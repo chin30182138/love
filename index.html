@@ -1,90 +1,124 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
+<!doctype html>
+<html lang="zh-Hant-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>仙人指路占卜研究學會 - 感情卜卦教學課程</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>神獸七十二型人格｜職場識人與應對策略</title>
+  <meta name="description" content="神獸七十二型人格課程，幫助您在職場識人、化解衝突、贏得貴人、明辨真偽，打造高效職場應對策略。">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:#2C3E50;
+      --gold:#C6A563;
+      --bg:#FFFFFF;
+      --soft:#F7F5F0;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+    }
+    body {font-family:"Noto Sans TC", sans-serif;margin:0;background:var(--bg);color:#333;line-height:1.8;}
+    h1,h2,h3 {font-family:"Noto Serif TC", serif;color:var(--ink);margin-top:0;}
+    header {background: linear-gradient(135deg, #2C3E50 0%, #3A6073 100%);color:#fff;padding:40px 20px;text-align:center;border-bottom: 4px solid var(--gold);}
+    header h1 {font-size:42px;margin:0;letter-spacing:2px;color: var(--gold);}
+    header p {margin:12px 0 0;font-size:22px;color:#eaf2f8;}
+    section {max-width:960px;margin:auto;padding:60px 20px;}
+    .highlight {background:var(--soft);padding:18px;border-radius:12px;box-shadow:var(--shadow);}
+    .benefits,.scenarios {display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:20px;}
+    .card {background:#fff;border-radius:12px;padding:20px;box-shadow:var(--shadow);text-align:center;}
+    .story {background:#fff;padding:20px;border-left:5px solid var(--gold);border-radius:12px;box-shadow:var(--shadow);margin-bottom:40px;}
+    .info {background:var(--soft);padding:30px;border-radius:12px;box-shadow:var(--shadow);text-align:center;}
+    .btn {display:inline-block;background:var(--gold);color:#fff;padding:12px 22px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:20px;box-shadow:var(--shadow);}
+    footer {background:#1E2A38;color:#cbd5e1;text-align:center;padding:20px;margin-top:40px;}
+    .sticky-cta {display: none;}
+    .sticky-cta a {flex:1;display:block;text-align:center;background:var(--gold);color:#fff;font-weight:700;padding:14px;border-radius:999px;box-shadow:var(--shadow);text-decoration:none;}
+    @media(max-width:768px){
+      .sticky-cta {position:fixed;left:16px;right:16px;bottom:16px;z-index:100;display:flex;justify-content:center;}
+    }
+    /* 幻燈片樣式 */
+    .slideshow-container {max-width:100%;position:relative;overflow:hidden;border-radius:12px;box-shadow:var(--shadow);height:400px;}
+    .slide {position:absolute;width:100%;height:100%;border-radius:12px;opacity:0;transition:opacity 1s ease-in-out;}
+    .slide.active {opacity:1;z-index:1;}
+    .slide img {width:100%;height:100%;object-fit:cover;border-radius:12px;}
+    .caption {position:absolute;bottom:15px;left:0;right:0;text-align:center;color:#fff;font-size:20px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,0.6);}
+    .slideshow-container .prev,.slideshow-container .next {cursor:pointer;position:absolute;top:50%;padding:12px;margin-top:-22px;color:#fff;font-weight:bold;font-size:22px;border-radius:50%;background:rgba(0,0,0,0.4);user-select:none;transition:0.3s;}
+    .slideshow-container .prev:hover,.slideshow-container .next:hover {background:rgba(0,0,0,0.7);}
+    .slideshow-container .prev {left:10px;}
+    .slideshow-container .next {right:10px;}
+    .dots {text-align:center;position:absolute;bottom:10px;left:0;right:0;}
+    .dot {cursor:pointer;height:10px;width:10px;margin:0 3px;background-color:#bbb;border-radius:50%;display:inline-block;transition:background-color 0.6s ease;}
+    .active-dot,.dot:hover {background-color:var(--gold);}
+  </style>
 </head>
-<body class="bg-gradient-to-b from-pink-50 to-orange-50 text-gray-800">
+<body>
 
-  <!-- Hero 區塊 -->
-  <section class="text-center py-20 px-6 bg-pink-100/70 rounded-b-[3rem] shadow-lg">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-pink-700 mb-6 drop-shadow">
-      仙人指路占卜研究學會
-    </h1>
-    <p class="text-lg md:text-xl text-gray-700 mb-6">
-      專注於感情卜卦，讓你理解愛情的秘密，找到專屬於你的答案。
-    </p>
-    <a href="https://line.me/ti/p/-MjNOiY2CG" target="_blank" rel="noopener noreferrer"
-       class="mt-4 inline-block px-8 py-4 rounded-2xl bg-pink-500 text-white text-lg shadow-md hover:bg-pink-600 transition">
-      💌 立即加入 LINE 報名
-    </a>
-  </section>
+  <header>
+    <h1>神獸七十二型人格</h1>
+    <p>職場識人與應對策略</p>
+  </header>
 
-  <!-- 課程資訊 -->
-  <section class="py-16 px-6 max-w-5xl mx-auto text-center">
-    <h2 class="text-3xl font-bold text-pink-700 mb-6">課程資訊</h2>
-    <p class="text-gray-700 leading-relaxed mb-4">
-      📅 開課日期：2025年11月1日起，每週早上 9:00-11:00 <br/>
-      📍 地點：台南市南門勞工育樂中心 <br/>
-      💰 費用：每四堂 2000 元，共 32 堂 <br/>
-    </p>
-    <p class="text-pink-600 font-semibold mb-2">
-      ⚠️ 本課程需具備卜卦基礎，若您是零基礎，建議先參加入門班。
-    </p>
-    <p class="text-pink-600 font-semibold">
-      在課程中，你將學會一眼洞悉對方是否適合、是否有小三小王、對方是否真心愛你，還是只為肉體的歡愉。
-    </p>
-  </section>
-
-  <!-- 課程特色 -->
-  <section class="py-16 px-6 bg-white">
-    <h2 class="text-3xl font-bold text-center text-pink-700 mb-10">課程特色</h2>
-    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">需具備卜卦基礎</h3>
-        <p class="text-gray-600">課程專為已有基礎的學員設計，能快速進入進階學習。</p>
+  <!-- 講師簡介 + 幻燈片 -->
+  <section>
+    <h2>講師簡介</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center">
+      <div class="slideshow-container">
+        <div class="slide active"><img src="https://img.1shop.tw/xBLVb25lP0z39Z8AwpX39jmn/1LPZao453vJ0EjZV3QAR86mM/original.jpg"><div class="caption">上課剪影</div></div>
+        <div class="slide"><img src="https://img.1shop.tw/xBLVb25lP0z39Z8AwpX39jmn/nMRpQ02P3XEA2BOElr7BkJaE/original.jpg"><div class="caption">結業團照</div></div>
+        <div class="slide"><img src="https://img.1shop.tw/xBLVb25lP0z39Z8AwpX39jmn/O5gwrR4GNQbq8BOqYBpn071e/original.jpg"><div class="caption">結業團照</div></div>
+        <div class="slide"><img src="https://img.1shop.tw/xBLVb25lP0z39Z8AwpX39jmn/wP6vpqMBNgzKnAEmld7DaZ0y/original.jpg"><div class="caption">教學實況</div></div>
+        <div class="slide"><img src="https://img.1shop.tw/xBLVb25lP0z39Z8AwpX39jmn/kEyLdZjRNLmwbBKqY8pWbz6O/original.jpg"><div class="caption">教學實況</div></div>
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        <div class="dots">
+          <span class="dot" onclick="currentSlide(1)"></span>
+          <span class="dot" onclick="currentSlide(2)"></span>
+          <span class="dot" onclick="currentSlide(3)"></span>
+          <span class="dot" onclick="currentSlide(4)"></span>
+          <span class="dot" onclick="currentSlide(5)"></span>
+        </div>
       </div>
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">進階技巧提升</h3>
-        <p class="text-gray-600">帶領學員解析更複雜的感情案例，提升占卜判斷力。</p>
-      </div>
-      <div class="p-6 bg-pink-50 rounded-2xl shadow hover:shadow-lg transition">
-        <h3 class="font-semibold text-lg text-pink-600 mb-2">實戰演練</h3>
-        <p class="text-gray-600">結合真實案例與模擬問卦，讓你能將所學應用在生活與服務中。</p>
+      <div>
+        <ul style="list-style:'● ';padding-left:20px;line-height:1.8">
+          <li>台南市勞工領袖大學講師</li>
+          <li>仙人指路五術研究學會創會長</li>
+          <li>台南市勞工育樂中心金錢卦師養成班講師</li>
+          <li>勞動力發展署雲嘉南分署產業人才投資方案講師</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- 學員見證 -->
-  <section class="py-16 px-6 bg-pink-50">
-    <h2 class="text-3xl font-bold text-center text-pink-700 mb-10">學員見證 🌸</h2>
-    <div class="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-      <div class="p-6 bg-white rounded-2xl shadow hover:shadow-md">
-        <p class="italic text-gray-700 mb-2">“上完課後，我終於理解自己在感情中的模式，現在能更清楚判斷對方是否真心。”</p>
-        <p class="text-pink-600 font-semibold">— 小美，28歲</p>
-      </div>
-      <div class="p-6 bg-white rounded-2xl shadow hover:shadow-md">
-        <p class="italic text-gray-700 mb-2">“老師教得很細心，讓我能快速進階卜卦，還幫助我避開了一段不合適的感情。”</p>
-        <p class="text-pink-600 font-semibold">— 阿志，32歲</p>
-      </div>
-    </div>
-  </section>
+  <footer>
+    <p>© 2025 仙人指路占卜研究學會 | 神獸七十二型人格課程</p>
+  </footer>
 
-  <!-- CTA 報名 -->
-  <section class="py-20 px-6 text-center bg-pink-100/50 rounded-t-[3rem]">
-    <h2 class="text-3xl font-bold text-pink-700 mb-4">
-      想開始一段自我與愛情的探索旅程嗎？
-    </h2>
-    <p class="text-gray-700 mb-6">
-      立即加入我們的感情卜卦教學課程，學會洞悉愛情的智慧。
-    </p>
-    <a href="https://line.me/ti/p/-MjNOiY2CG" target="_blank" rel="noopener noreferrer"
-       class="px-10 py-4 rounded-2xl bg-pink-500 text-white text-lg shadow-md hover:bg-pink-600 transition">
-      我要報名
-    </a>
-  </section>
+  <div class="sticky-cta">
+    <a href="https://line.me/ti/p/-MjNOiY2CG" target="_blank">📲 加 LINE 立即報名</a>
+  </div>
 
+  <script>
+    let slideIndex = 0;
+    let slides, dots, slideTimer;
+
+    function initSlides() {
+      slides = document.querySelectorAll(".slide");
+      dots = document.querySelectorAll(".dot");
+      showSlides(slideIndex);
+      slideTimer = setTimeout(autoSlides, 5000); // 每 5 秒切換
+    }
+
+    function showSlides(n) {
+      if (n >= slides.length) { slideIndex = 0 }
+      if (n < 0) { slideIndex = slides.length - 1 }
+      slides.forEach(s => s.classList.remove("active"));
+      dots.forEach(d => d.classList.remove("active-dot"));
+      slides[slideIndex].classList.add("active");
+      dots[slideIndex].classList.add("active-dot");
+    }
+
+    function plusSlides(n) { slideIndex += n; showSlides(slideIndex); resetTimer(); }
+    function currentSlide(n) { slideIndex = n - 1; showSlides(slideIndex); resetTimer(); }
+    function autoSlides() { slideIndex++; if (slideIndex >= slides.length) { slideIndex = 0 } showSlides(slideIndex); slideTimer = setTimeout(autoSlides, 5000); }
+    function resetTimer() { clearTimeout(slideTimer); slideTimer = setTimeout(autoSlides, 5000); }
+
+    document.addEventListener("DOMContentLoaded", initSlides);
+  </script>
 </body>
 </html>
