@@ -3,167 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>仙人指路占卜研究學會 - 感情卜卦教學課程</title>
+  <title>API 測試頁面</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .date-box {
-      background: #fef6f0;
-      border: 1px solid #ddd;
-      padding: 12px;
-      margin: 8px 0;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      border-radius: 0.75rem;
-    }
-  </style>
 </head>
-<body class="bg-gradient-to-b from-pink-50 to-orange-50 text-gray-800">
+<body class="bg-gray-100 p-6">
 
-  <!-- Hero -->
-  <section class="relative z-10 flex flex-col md:flex-row items-center justify-center text-center md:text-left py-20 px-6 bg-pink-100/70 rounded-b-[3rem] shadow-lg">
-    <div class="md:w-1/2 mb-8 md:mb-0 flex justify-center">
-      <img src="pic/love1.png" alt="戀愛卜卦插畫" class="w-80 md:w-96 drop-shadow-lg"/>
-    </div>
-    <div class="md:w-1/2">
-      <h1 class="text-4xl md:text-5xl font-extrabold text-pink-700 mb-6 drop-shadow">
-        仙人指路占卜研究學會
-      </h1>
-      <p class="text-lg md:text-xl text-gray-700 mb-6">
-        專注於感情卜卦，讓你理解愛情的秘密，找到專屬於你的答案。
-      </p>
-      <a href="https://line.me/ti/p/-MjNOiY2CG" target="_blank" rel="noopener noreferrer"
-         class="mt-4 inline-block px-8 py-4 rounded-2xl bg-pink-500 text-white text-lg shadow-md hover:bg-pink-600 transition">
-        💌 立即加入 LINE 報名
-      </a>
-    </div>
-  </section>
+  <h1 class="text-2xl font-bold text-center mb-6">🔮 API 測試頁面</h1>
 
-  <!-- 課程資訊 -->
-  <section class="py-16 px-6 max-w-5xl mx-auto text-center">
-    <h2 class="text-3xl font-bold text-pink-700 mb-6">課程資訊</h2>
-    <p class="text-gray-700 leading-relaxed mb-4">
-      📅 開課日期：2025年11月1日起，每週早上 9:00-11:00 <br/>
-      📍 地點：台南市南門勞工育樂中心 <br/>
-      💰 費用：每四堂 2000 元，共 32 堂 <br/>
-    </p>
-    <p class="text-pink-600 font-semibold mb-2">
-      ⚠️ 本課程需具備卜卦基礎，若您是零基礎，建議先參加入門班。
-    </p>
-    <p class="text-pink-600 font-semibold">
-      在課程中，你將學會一眼洞悉對方是否適合、是否有小三小王、對方是否真心愛你，還是只為肉體的歡愉。
-    </p>
-  </section>
+  <div class="flex justify-center">
+    <button id="testBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700">
+      測試 API
+    </button>
+  </div>
 
-  <!-- CTA -->
-  <section class="py-20 px-6 text-center bg-pink-100/50 rounded-t-[3rem]">
-    <h2 class="text-3xl font-bold text-pink-700 mb-4">
-      想開始一段自我與愛情的探索旅程嗎？
-    </h2>
-    <p class="text-gray-700 mb-6">
-      立即加入我們的感情卜卦教學課程，學會洞悉愛情的智慧。
-    </p>
-    <a href="https://line.me/ti/p/-MjNOiY2CG" target="_blank" rel="noopener noreferrer"
-       class="px-10 py-4 rounded-2xl bg-pink-500 text-white text-lg shadow-md hover:bg-pink-600 transition">
-      我要報名
-    </a>
-  </section>
-
-  <!-- 24節氣 -->
-  <section class="py-16 px-6 bg-white">
-    <h2 id="season-name" class="text-3xl font-bold text-center text-pink-700 mb-6">🌿 24節氣日曆</h2>
-    <div class="max-w-2xl mx-auto p-6 bg-pink-50 rounded-2xl shadow grid md:grid-cols-2 gap-4">
-      <div>
-        <div class="date-box" id="today-date"></div>
-        <div class="date-box" id="lunar-date"></div>
-        <p class="text-gray-700 mt-4" id="season-desc"></p>
-        <p class="text-pink-600 mt-4 font-semibold" id="mood"></p>
-      </div>
-      <div class="p-4 bg-white rounded-xl shadow-inner">
-        <h3 class="text-lg font-bold text-pink-600 mb-2">🌱 養生建議</h3>
-        <p class="text-gray-600" id="advice"></p>
-        <p class="text-gray-600 mt-3" id="next-season"></p>
-      </div>
-    </div>
-  </section>
+  <div id="output" class="mt-6 p-4 bg-white shadow rounded-lg text-gray-800 whitespace-pre-wrap"></div>
 
   <script>
-    const jieqi = [
-      { name:"立春",date:"2025-02-03",desc:"春回大地，萬物萌芽。",mood:"迎接新開始，容易躁動不安。",advice:"多接觸陽光，制定小目標，讓能量有方向。" },
-      { name:"雨水",date:"2025-02-18",desc:"冰雪消融，雨水漸多。",mood:"情緒敏感，容易受外界影響。",advice:"保持運動與規律作息，避免過度憂鬱。" },
-      { name:"驚蟄",date:"2025-03-05",desc:"春雷乍響，萬物甦醒。",mood:"情緒突然高漲或低落。",advice:"用寫日記、深呼吸方式平穩內心。" },
-      { name:"春分",date:"2025-03-20",desc:"晝夜均分，陰陽平衡。",mood:"情緒趨於平衡，但仍有隱藏焦慮。",advice:"適合靜坐、茶飲，保持內外和諧。" },
-      { name:"清明",date:"2025-04-04",desc:"春暖花開，慎終追遠。",mood:"思念情緒明顯，容易觸景傷情。",advice:"透過掃墓祭祖轉化情緒，與家人交流支持。" },
-      { name:"穀雨",date:"2025-04-20",desc:"雨生百穀，萬物茂盛。",mood:"積極性高，但容易急躁。",advice:"練習耐心，給自己時間醞釀成果。" },
-      { name:"立夏",date:"2025-05-05",desc:"夏季伊始，陽氣漸盛。",mood:"情緒容易亢奮或浮躁。",advice:"保持飲食清淡，進行適度運動釋放能量。" },
-      { name:"小滿",date:"2025-05-21",desc:"穀物漸滿，陽光充足。",mood:"情緒有滿足感，但也容易自滿。",advice:"提醒自己保持謙遜，繼續進步。" },
-      { name:"芒種",date:"2025-06-05",desc:"農忙時節，收穫開始。",mood:"容易焦慮，擔心趕不上節奏。",advice:"調整呼吸，專注當下，按部就班。" },
-      { name:"夏至",date:"2025-06-21",desc:"白晝最長，陽極之時。",mood:"精神亢奮，睡眠品質易受影響。",advice:"早睡早起，保持涼爽心境。" },
-      { name:"小暑",date:"2025-07-07",desc:"氣溫上升，暑氣初臨。",mood:"情緒煩躁，耐心不足。",advice:"多喝水，少爭辯，多理解。" },
-      { name:"大暑",date:"2025-07-22",desc:"一年最熱，注意養生。",mood:"容易情緒爆發或身心疲倦。",advice:"保持冷靜，適度休息與靜養。" },
-      { name:"立秋",date:"2025-08-07",desc:"秋天開始，暑退涼來。",mood:"帶有一絲失落與感傷。",advice:"多親近大自然，練習感恩。" },
-      { name:"處暑",date:"2025-08-23",desc:"炎熱漸退，氣候轉涼。",mood:"容易感到空虛或孤單。",advice:"多與朋友聚會，避免沉浸於孤寂。" },
-      { name:"白露",date:"2025-09-07",desc:"露水漸白，天氣轉涼。",mood:"情緒偏感傷，思鄉或思人。",advice:"安排短途旅行或抒發情感。" },
-      { name:"秋分",date:"2025-09-23",desc:"晝夜均分，能量平衡。",mood:"悲喜參半，容易反思過往。",advice:"用冥想與運動調整內心平衡。" },
-      { name:"寒露",date:"2025-10-08",desc:"氣溫下降，露更寒冷。",mood:"容易感到孤寂與冷清。",advice:"多曬太陽，與人保持溫暖互動。" },
-      { name:"霜降",date:"2025-10-23",desc:"霜氣初降，冬意漸濃。",mood:"情緒低落，缺乏動力。",advice:"補充營養，安排適度活動。" },
-      { name:"立冬",date:"2025-11-07",desc:"冬季開始，萬物收藏。",mood:"內心轉向內斂，思考變多。",advice:"保持社交，避免過度封閉自己。" },
-      { name:"小雪",date:"2025-11-22",desc:"天寒地凍，初雪可見。",mood:"容易覺得壓抑或沉重。",advice:"學習小確幸，營造溫馨氛圍。" },
-      { name:"大雪",date:"2025-12-07",desc:"雪勢漸大，寒意深重。",mood:"心情低沉，行動力下降。",advice:"補充溫熱食物，保持心境溫暖。" },
-      { name:"冬至",date:"2025-12-22",desc:"白晝最短，陰極之時。",mood:"容易孤獨感加重。",advice:"與家人團聚，增進心靈能量。" },
-      { name:"小寒",date:"2026-01-05",desc:"寒氣漸深，注意保暖。",mood:"心情沉靜，動力不足。",advice:"適合靜思、規劃新年方向。" },
-      { name:"大寒",date:"2026-01-20",desc:"一年最冷，養精蓄銳。",mood:"容易情緒僵化，缺乏彈性。",advice:"多做伸展與運動，保持活力。" }
-    ];
+    document.getElementById("testBtn").addEventListener("click", async () => {
+      const output = document.getElementById("output");
+      output.innerText = "⏳ 正在呼叫 API...";
 
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = today.getMonth() + 1;
-    const dd = today.getDate();
-    document.getElementById("today-date").innerText = `國曆：${yyyy}年${mm}月${dd}日`;
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ test: "hello" })
+        });
 
-    async function fetchLunarPrimary(y,m,d){
-      const url=`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`;
-      const r=await fetch(url);if(!r.ok)throw new Error();return await r.json();
-    }
-    async function fetchLunarBackup(y,m,d){
-      const url=`https://www.sojson.com/open/api/lunar/json.shtml?date=${y}-${m}-${d}`;
-      const r=await fetch(url);if(!r.ok)throw new Error();return await r.json();
-    }
-    async function fetchLunarDate(y,m,d){
-      try{const data=await fetchLunarPrimary(y,m,d);
-        document.getElementById("lunar-date").innerText="農曆："+data.text;
-      }catch(err){
-        try{const b=await fetchLunarBackup(y,m,d);
-          document.getElementById("lunar-date").innerText="農曆："+b.data.cnmonth+b.data.cnday;
-        }catch{document.getElementById("lunar-date").innerText=`農曆：${y}年${m}月${d}日（假資料）`;}
+        const data = await res.json();
+        output.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.innerText = "❌ 發生錯誤: " + err.message;
       }
-    }
-    fetchLunarDate(yyyy,mm,dd);
-
-    const todayStr=today.toISOString().split("T")[0];
-    let currentSeason=jieqi[0],nextSeason=jieqi[0];
-    for(let i=0;i<jieqi.length;i++){
-      if(todayStr>=jieqi[i].date){currentSeason=jieqi[i];nextSeason=jieqi[i+1]||jieqi[0];}
-    }
-    document.getElementById("season-name").innerText="🌿 "+currentSeason.name;
-    document.getElementById("season-desc").innerText=currentSeason.desc;
-    document.getElementById("mood").innerText="💭 心情傾向："+currentSeason.mood;
-    document.getElementById("advice").innerText=currentSeason.advice;
-
-    const nextDate=new Date(nextSeason.date);
-    const diffTime=nextDate-today;
-    const diffDays=Math.ceil(diffTime/(1000*60*60*24));
-    document.getElementById("next-season").innerText=`📅 下一個節氣：${nextSeason.name}（還有 ${diffDays} 天）`;
+    });
   </script>
-    <!-- 測試按鈕 -->
-  <section class="py-10 text-center">
-    <a href="test.html" 
-       class="px-8 py-3 rounded-xl bg-blue-500 text-white text-lg shadow-md hover:bg-blue-600 transition">
-      🧪 前往18禁測試頁面
-    </a>
-  </section>
-</body>
-</html>
-
 </body>
 </html>
