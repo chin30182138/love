@@ -1,244 +1,153 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>神獸人格 × 性愛五行中庸分析</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>18禁契合度測試</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    #congratsPopup { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; background: rgba(0,0,0,0.5); }
-    #congratsPopup .box { background: white; padding: 2rem; border-radius: 1rem; text-align: center; animation: pop 0.5s ease; }
-    @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
-    .confetti { position: absolute; width: 10px; height: 20px; opacity: 0.8; animation: fall 3s linear infinite; }
-    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
-
-    /* 水晶球動畫 */
-    .crystal-ball {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 6px solid rgba(255,255,255,0.8);
-      background: radial-gradient(circle at 30% 30%, #fbcfe8, #f472b6, #a78bfa);
-      animation: spin 2s linear infinite;
-      margin: 0 auto 20px auto;
-      box-shadow: 0 0 25px rgba(244,114,182,0.8);
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
-<body class="p-6 bg-gradient-to-b from-pink-100 to-red-100 min-h-screen">
+<body class="bg-gradient-to-b from-gray-50 to-pink-100 text-gray-800 min-h-screen flex flex-col items-center py-10">
 
-  <!-- 回首頁 -->
-  <div class="mb-6 text-center">
-    <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700">
-      ⬅️ 回首頁
-    </a>
-  </div>
+  <h1 class="text-3xl font-bold text-pink-700 mb-6">🔮 契合度分析系統</h1>
 
-  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析</h1>
+  <!-- A 方 / B 方選單 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 w-3/4">
+    <div class="p-4 bg-white rounded-xl shadow">
+      <h2 class="font-bold text-lg mb-2 text-pink-600">A 方</h2>
+      <select id="aBeast" class="w-full border p-2 rounded mb-2">
+        <option>青龍</option><option>朱雀</option><option>勾陳</option>
+        <option>螣蛇</option><option>白虎</option><option>玄武</option>
+      </select>
+      <select id="aKin" class="w-full border p-2 rounded mb-2">
+        <option>父母</option><option>兄弟</option><option>妻財</option>
+        <option>官鬼</option><option>子孫</option>
+      </select>
+      <select id="aBranch" class="w-full border p-2 rounded">
+        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
+        <option>辰</option><option>巳</option><option>午</option><option>未</option>
+        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
+      </select>
+    </div>
 
-  <!-- A方 -->
-  <div class="bg-white shadow p-4 rounded-xl mb-4">
-    <h2 class="font-bold mb-2">A方</h2>
-    <select id="aBeast"></select>
-    <select id="aKin"></select>
-    <select id="aBranch"></select>
-  </div>
-
-  <!-- B方 -->
-  <div class="bg-white shadow p-4 rounded-xl mb-4">
-    <h2 class="font-bold mb-2">B方</h2>
-    <select id="bBeast"></select>
-    <select id="bKin"></select>
-    <select id="bBranch"></select>
+    <div class="p-4 bg-white rounded-xl shadow">
+      <h2 class="font-bold text-lg mb-2 text-pink-600">B 方</h2>
+      <select id="bBeast" class="w-full border p-2 rounded mb-2">
+        <option>青龍</option><option>朱雀</option><option>勾陳</option>
+        <option>螣蛇</option><option>白虎</option><option>玄武</option>
+      </select>
+      <select id="bKin" class="w-full border p-2 rounded mb-2">
+        <option>父母</option><option>兄弟</option><option>妻財</option>
+        <option>官鬼</option><option>子孫</option>
+      </select>
+      <select id="bBranch" class="w-full border p-2 rounded">
+        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
+        <option>辰</option><option>巳</option><option>午</option><option>未</option>
+        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
+      </select>
+    </div>
   </div>
 
   <!-- 日月支 -->
-  <div class="bg-white shadow p-4 rounded-xl mb-6">
-    <label>日支 <select id="dayBranch"></select></label>
-    <label class="ml-4">月支 <select id="monthBranch"></select></label>
-  </div>
-
-  <div class="text-center mb-6">
-    <button id="analyzeBtn" class="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-red-700 transition">
-      🚀 開始分析
-    </button>
-  </div>
-
-  <!-- 分析進度 -->
-  <div id="loadingSection" class="hidden text-center mb-6">
-    <div class="crystal-ball"></div>
-    <p class="text-lg font-semibold text-gray-700 mb-2">🔮 正在分析中，請稍候...</p>
-    <div class="w-full bg-gray-200 rounded-full h-4 max-w-lg mx-auto">
-      <div id="loadingBar" class="bg-pink-500 h-4 rounded-full text-xs text-white text-right pr-2" style="width:0%">0%</div>
+  <div class="flex gap-4 mb-6">
+    <div>
+      <label class="font-bold">日支：</label>
+      <select id="dayBranch" class="border p-2 rounded">
+        <option>子</option><option>丑</option>...<option>亥</option>
+      </select>
+    </div>
+    <div>
+      <label class="font-bold">月支：</label>
+      <select id="monthBranch" class="border p-2 rounded">
+        <option>子</option><option>丑</option>...<option>亥</option>
+      </select>
     </div>
   </div>
 
-  <!-- 結果 -->
-  <div id="result" class="hidden mt-6 bg-white shadow-lg rounded-xl p-6">
-    <div class="mb-6">
-      <canvas id="loveChart" width="400" height="400"></canvas>
-    </div>
-    <div class="mb-6">
-      <label class="font-bold">契合度：</label>
-      <div class="w-full bg-gray-200 rounded-full h-4">
-        <div id="matchBar" class="bg-green-500 h-4 rounded-full text-right pr-2 text-xs text-white">0%</div>
-      </div>
-    </div>
-    <div id="analysisText" class="prose max-w-none"></div>
+  <!-- 進度條 -->
+  <div class="w-3/4 bg-gray-200 rounded-full h-6 mb-4">
+    <div id="progress-bar" class="bg-pink-500 h-6 rounded-full text-white text-sm flex items-center justify-center"
+         style="width:0%">0%</div>
   </div>
 
-  <!-- 恭喜彈窗 -->
-  <div id="congratsPopup" class="flex">
-    <div class="box">
-      <h2 class="text-2xl font-bold text-green-600">🎉 恭喜！</h2>
-      <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
-    </div>
-  </div>
+  <!-- 分析結果 -->
+  <div id="result" class="text-lg text-gray-700 font-semibold mt-4"></div>
 
-  <!-- 音效 -->
-  <audio id="goodMusic" src="good.mp3"></audio>
-  <audio id="badMusic" src="bad.mp3"></audio>
+  <!-- 分析按鈕 -->
+  <button onclick="startAnalysis()"
+          class="mt-6 px-8 py-4 bg-pink-500 text-white text-lg rounded-2xl shadow hover:bg-pink-600 transition">
+    開始分析
+  </button>
+
+  <!-- 聲音播放器 -->
+  <audio id="bg-audio" autoplay loop hidden>
+    <source src="pic/bg-music.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="success-audio" hidden>
+    <source src="pic/success.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="fail-audio" hidden>
+    <source src="pic/fail.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
-    const beasts = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
-    const kins = ["父母","兄弟","妻財","官鬼","子孫","應位"];
-    const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-
-    function fillSelect(select, options) {
-      select.innerHTML = options.map(o => `<option value="${o}">${o}</option>`).join("");
+    function playAudio(id) {
+      const audio = document.getElementById(id);
+      if (audio) { audio.currentTime = 0; audio.play(); }
     }
 
-    // 初始化
-    fillSelect(aBeast, beasts);
-    fillSelect(bBeast, beasts);
-    fillSelect(aKin, kins);
-    fillSelect(bKin, kins);
-    fillSelect(aBranch, branches);
-    fillSelect(bBranch, branches);
-    fillSelect(dayBranch, branches);
-    fillSelect(monthBranch, branches);
-
-    // 互斥處理
-    function updateOptions() {
-      const aBeastVal = aBeast.value;
-      const bBeastVal = bBeast.value;
-      const aKinVal = aKin.value;
-      const bKinVal = bKin.value;
-
-      fillSelect(aBeast, beasts.filter(b => b !== bBeastVal));
-      fillSelect(bBeast, beasts.filter(b => b !== aBeastVal));
-      aBeast.value = aBeastVal;
-      bBeast.value = bBeastVal;
-
-      fillSelect(aKin, kins.filter(k => k !== bKinVal));
-      fillSelect(bKin, kins.filter(k => k !== aKinVal));
-      aKin.value = aKinVal;
-      bKin.value = bKinVal;
-    }
-
-    aBeast.addEventListener("change", updateOptions);
-    bBeast.addEventListener("change", updateOptions);
-    aKin.addEventListener("change", updateOptions);
-    bKin.addEventListener("change", updateOptions);
-
-    let chart;
-
-    document.getElementById("analyzeBtn").addEventListener("click", async ()=>{
-      const payload = {
-        aBeast: aBeast.value, aKin: aKin.value, aBranch: aBranch.value,
-        bBeast: bBeast.value, bKin: bKin.value, bBranch: bBranch.value,
-        dayBranch: dayBranch.value, monthBranch: monthBranch.value
-      };
-
-      const loadingSection = document.getElementById("loadingSection");
-      const loadingBar = document.getElementById("loadingBar");
-      const outputDiv = document.getElementById("analysisText");
-
-      document.getElementById("result").classList.add("hidden");
-      loadingSection.classList.remove("hidden");
-
-      // 動態進度條模擬
+    async function startAnalysis() {
       let progress = 0;
-      const interval = setInterval(()=>{
-        if(progress < 95){
-          progress += Math.floor(Math.random()*5)+1;
-          if(progress>95) progress=95;
-          loadingBar.style.width = progress+"%";
-          loadingBar.innerText = progress+"%";
-        }
-      }, 200);
+      const bar = document.getElementById("progress-bar");
+      const result = document.getElementById("result");
 
-      try {
-        const res = await fetch("/api/analyze", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
+      result.textContent = "正在分析中...";
+      const interval = setInterval(() => {
+        if (progress >= 100) {
+          clearInterval(interval);
 
-        const data = await res.json();
+          // 呼叫 API
+          fetch("/api/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              aBeast: document.getElementById("aBeast").value,
+              aKin: document.getElementById("aKin").value,
+              aBranch: document.getElementById("aBranch").value,
+              bBeast: document.getElementById("bBeast").value,
+              bKin: document.getElementById("bKin").value,
+              bBranch: document.getElementById("bBranch").value,
+              dayBranch: document.getElementById("dayBranch").value,
+              monthBranch: document.getElementById("monthBranch").value
+            })
+          })
+          .then(res => res.json())
+          .then(data => {
+            const score = data.score ?? Math.floor(Math.random()*101);
+            bar.style.width = score + "%";
+            bar.textContent = score + "%";
 
-        clearInterval(interval);
-        loadingBar.style.width = "100%";
-        loadingBar.innerText = "100%";
-
-        setTimeout(()=>{
-          loadingSection.classList.add("hidden");
-          document.getElementById("result").classList.remove("hidden");
-
-          outputDiv.innerHTML = data.text ? marked.parse(data.text) : "⚠️ 沒有收到分析內容";
-
-          if(chart) chart.destroy();
-          chart = new Chart(document.getElementById("loveChart"),{
-            type:"radar",
-            data:{ labels:["情慾(火)","情感(水)","控制(土)","冒險(金)","創意(木)"],
-              datasets:[{ label:"性愛能量", data:data.scores||[20,20,20,20,20],
-                backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
+            if (score >= 80) {
+              result.textContent = "🎉 契合度超高！天作之合！\n" + (data.text || "");
+              playAudio("success-audio");
+              confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+            } else if (score <= 40) {
+              result.textContent = "💔 契合度偏低，需要更多磨合。\n" + (data.text || "");
+              playAudio("fail-audio");
+            } else {
+              result.textContent = "🤔 中等契合度，可以嘗試更深入交流。\n" + (data.text || "");
+            }
+          })
+          .catch(err => {
+            result.textContent = "❌ 分析失敗：" + err.message;
           });
 
-          const bar = document.getElementById("matchBar");
-          const match = data.match || 0;
-          bar.style.width = match + "%";
-          bar.innerText = match + "%";
-          bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
-            (match >= 80 ? "bg-green-500" : match >= 50 ? "bg-yellow-500" : "bg-red-500");
-
-          if(match >= 80){ playMusic("good"); showCongrats(); }
-          else if(match < 50){ playMusic("bad"); }
-
-        }, 600);
-
-      } catch(err){
-        clearInterval(interval);
-        loadingSection.classList.add("hidden");
-        outputDiv.innerHTML = "❌ 錯誤：" + err.message;
-      }
-    });
-
-    function showCongrats(){
-      const popup=congratsPopup;
-      popup.style.display="flex";
-      for(let i=0;i<30;i++){
-        const c=document.createElement("div");
-        c.className="confetti";
-        c.style.left=Math.random()*100+"vw";
-        c.style.background=["#f87171","#34d399","#60a5fa","#fbbf24","#a78bfa"][Math.random()*5|0];
-        c.style.animationDuration=(2+Math.random()*3)+"s";
-        popup.appendChild(c);
-        setTimeout(()=>c.remove(),3000);
-      }
-      setTimeout(()=>{popup.style.display="none";},5000);
-    }
-
-    function playMusic(type){
-      goodMusic.pause(); badMusic.pause();
-      if(type==="good"){goodMusic.currentTime=0;goodMusic.play();}
-      else{badMusic.currentTime=0;badMusic.play();}
+        } else {
+          progress++;
+          bar.style.width = progress + "%";
+          bar.textContent = progress + "%";
+        }
+      }, 40);
     }
   </script>
 </body>
