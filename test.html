@@ -7,6 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    #congratsPopup { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; background: rgba(0,0,0,0.5); }
+    #congratsPopup .box { background: white; padding: 2rem; border-radius: 1rem; text-align: center; animation: pop 0.5s ease; }
+    @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+    .confetti { position: absolute; width: 10px; height: 20px; opacity: 0.8; animation: fall 3s linear infinite; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+  </style>
 </head>
 <body class="p-6 bg-gray-50">
 
@@ -14,7 +21,7 @@
 
   <!-- A方 -->
   <div class="mb-4">
-    <h2>A方</h2>
+    <h2 class="font-bold">A方</h2>
     <select id="aBeast"></select>
     <select id="aKin"></select>
     <select id="aBranch"></select>
@@ -22,7 +29,7 @@
 
   <!-- B方 -->
   <div class="mb-4">
-    <h2>B方</h2>
+    <h2 class="font-bold">B方</h2>
     <select id="bBeast"></select>
     <select id="bKin"></select>
     <select id="bBranch"></select>
@@ -38,20 +45,70 @@
 
   <!-- 結果 -->
   <div id="result" class="mt-6 hidden">
-    <canvas id="loveChart" width="400" height="400"></canvas>
+    <!-- 雷達圖 -->
+    <div class="mb-4">
+      <canvas id="loveChart" width="400" height="400"></canvas>
+    </div>
+    <!-- 契合度條 -->
+    <div class="mb-4">
+      <label class="font-bold">契合度：</label>
+      <div class="w-full bg-gray-200 rounded-full h-4">
+        <div id="matchBar" class="bg-green-500 h-4 rounded-full text-right pr-2 text-xs text-white">0%</div>
+      </div>
+    </div>
+    <!-- 分析文字 -->
     <div id="analysisText" class="mt-4 p-3 bg-white shadow rounded prose max-w-none"></div>
   </div>
 
-  <script>
-    const beasts=["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
-    const kins=["父母","兄弟","妻財","官鬼","子孫","應位"];
-    const branch=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  <!-- 恭喜彈窗 -->
+  <div id="congratsPopup" class="flex">
+    <div class="box">
+      <h2 class="text-2xl font-bold text-green-600">🎉 恭喜！</h2>
+      <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
+    </div>
+  </div>
 
-    function fill(sel,arr){ sel.innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); }
-    fill(aBeast,beasts); fill(bBeast,beasts);
-    fill(aKin,kins); fill(bKin,kins);
-    fill(aBranch,branch); fill(bBranch,branch);
-    fill(dayBranch,branch); fill(monthBranch,branch);
+  <script>
+    const beasts = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
+    const kins = ["父母","兄弟","妻財","官鬼","子孫","應位"];
+    const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+
+    function fillSelect(select, options) {
+      select.innerHTML = options.map(o => `<option value="${o}">${o}</option>`).join("");
+    }
+
+    // 初始化
+    fillSelect(aBeast, beasts);
+    fillSelect(bBeast, beasts);
+    fillSelect(aKin, kins);
+    fillSelect(bKin, kins);
+    fillSelect(aBranch, branches);
+    fillSelect(bBranch, branches);
+    fillSelect(dayBranch, branches);
+    fillSelect(monthBranch, branches);
+
+    // 互斥處理
+    function updateOptions() {
+      const aBeastVal = aBeast.value;
+      const bBeastVal = bBeast.value;
+      const aKinVal = aKin.value;
+      const bKinVal = bKin.value;
+
+      fillSelect(aBeast, beasts.filter(b => b !== bBeastVal));
+      fillSelect(bBeast, beasts.filter(b => b !== aBeastVal));
+      aBeast.value = aBeastVal;
+      bBeast.value = bBeastVal;
+
+      fillSelect(aKin, kins.filter(k => k !== bKinVal));
+      fillSelect(bKin, kins.filter(k => k !== aKinVal));
+      aKin.value = aKinVal;
+      bKin.value = bKinVal;
+    }
+
+    aBeast.addEventListener("change", updateOptions);
+    bBeast.addEventListener("change", updateOptions);
+    aKin.addEventListener("change", updateOptions);
+    bKin.addEventListener("change", updateOptions);
 
     let chart;
 
@@ -61,6 +118,9 @@
         bBeast: bBeast.value, bKin: bKin.value, bBranch: bBranch.value,
         dayBranch: dayBranch.value, monthBranch: monthBranch.value
       };
+
+      const outputDiv = document.getElementById("analysisText");
+      outputDiv.innerHTML = "⏳ 正在分析中...";
 
       try {
         const res = await fetch("/api/analyze", {
@@ -77,7 +137,7 @@
         const data = await res.json();
 
         document.getElementById("result").classList.remove("hidden");
-        document.getElementById("analysisText").innerHTML = marked.parse(data.text);
+        outputDiv.innerHTML = marked.parse(data.text);
 
         if(chart) chart.destroy();
         chart = new Chart(document.getElementById("loveChart"),{
@@ -87,11 +147,37 @@
               backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
         });
 
+        // 更新契合度條
+        const bar = document.getElementById("matchBar");
+        bar.style.width = data.match + "%";
+        bar.innerText = data.match + "%";
+        bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
+          (data.match >= 80 ? "bg-green-500" : data.match >= 50 ? "bg-yellow-500" : "bg-red-500");
+
+        // 契合度高 → 彩帶特效
+        if(data.match >= 80){ showCongrats(); }
+
       } catch(err){
-        alert(err.message);
+        outputDiv.innerHTML = "❌ 錯誤：" + err.message;
         console.error(err);
       }
     });
+
+    // 彩帶 + 恭喜彈窗
+    function showCongrats(){
+      const popup=congratsPopup;
+      popup.style.display="flex";
+      for(let i=0;i<30;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.background=["#f87171","#34d399","#60a5fa","#fbbf24","#a78bfa"][Math.random()*5|0];
+        c.style.animationDuration=(2+Math.random()*3)+"s";
+        popup.appendChild(c);
+        setTimeout(()=>c.remove(),3000);
+      }
+      setTimeout(()=>{popup.style.display="none";},5000);
+    }
   </script>
 </body>
 </html>
