@@ -3,21 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>神獸人格 × 性愛五行中庸分析 (測試版)</title>
+  <title>神獸人格 × 性愛五行中庸分析</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    #congratsPopup { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; background: rgba(0,0,0,0.5); }
-    #congratsPopup .box { background: white; padding: 2rem; border-radius: 1rem; text-align: center; animation: pop 0.5s ease; }
-    @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
-    .confetti { position: absolute; width: 10px; height: 20px; opacity: 0.8; animation: fall 3s linear infinite; }
-    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
-  </style>
 </head>
 <body class="p-6 bg-gray-50">
 
-  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析 (假資料測試版)</h1>
+  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析</h1>
 
   <!-- A方 -->
   <div class="mb-4">
@@ -45,24 +38,8 @@
 
   <!-- 結果 -->
   <div id="result" class="mt-6 hidden">
-    <div class="mb-4">
-      <canvas id="loveChart" width="400" height="400"></canvas>
-    </div>
-    <div class="mb-4">
-      <label class="font-bold">契合度：</label>
-      <div class="w-full bg-gray-200 rounded-full h-4">
-        <div id="matchBar" class="bg-green-500 h-4 rounded-full text-right pr-2 text-xs text-white">0%</div>
-      </div>
-    </div>
+    <canvas id="loveChart" width="400" height="400"></canvas>
     <div id="analysisText" class="mt-4 p-3 bg-white shadow rounded prose max-w-none"></div>
-  </div>
-
-  <!-- 恭喜彈窗 -->
-  <div id="congratsPopup" class="flex">
-    <div class="box">
-      <h2 class="text-2xl font-bold text-green-600">🎉 恭喜！</h2>
-      <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
-    </div>
   </div>
 
   <script>
@@ -78,51 +55,37 @@
 
     let chart;
 
-    // 測試版：用假資料
-    document.getElementById("analyzeBtn").addEventListener("click", ()=>{
-      const data = {
-        text: "## 性愛場景與角色扮演\n- 禁忌場景：摩天大樓窗邊浪漫調情\n- 角色扮演：權力遊戲主僕情境\n\n## 性愛技巧與體位推薦\n- 深度擁抱交合\n- 語音催眠與角色互換\n\n## 性愛玩具與情境設置\n- 震動棒、絲質束縛配件\n- 燈光昏暗搭配感官剝奪\n\n## 劇本片段\n> A方：今晚，你只能聽我的命令。\n> B方：我願意被你完全掌控…",
-        scores: [8, 7, 9, 6, 8],
-        match: 85
+    document.getElementById("analyzeBtn").addEventListener("click", async ()=>{
+      const payload = {
+        aBeast: aBeast.value, aKin: aKin.value, aBranch: aBranch.value,
+        bBeast: bBeast.value, bKin: bKin.value, bBranch: bBranch.value,
+        dayBranch: dayBranch.value, monthBranch: monthBranch.value
       };
-      renderResult(data);
-    });
 
-    function renderResult(data){
-      document.getElementById("result").classList.remove("hidden");
-      document.getElementById("analysisText").innerHTML = marked.parse(data.text);
+      try {
+        const res = await fetch("/api/analyze", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
 
-      if(chart) chart.destroy();
-      chart = new Chart(document.getElementById("loveChart"),{
-        type:"radar",
-        data:{ labels:["情慾(火)","情感(水)","控制(土)","冒險(金)","創意(木)"],
-          datasets:[{ label:"性愛能量", data:data.scores,
-            backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
-      });
+        document.getElementById("result").classList.remove("hidden");
+        document.getElementById("analysisText").innerHTML = marked.parse(data.text);
 
-      const bar = document.getElementById("matchBar");
-      bar.style.width = data.match + "%";
-      bar.innerText = data.match + "%";
-      bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
-        (data.match >= 80 ? "bg-green-500" : data.match >= 50 ? "bg-yellow-500" : "bg-red-500");
+        if(chart) chart.destroy();
+        chart = new Chart(document.getElementById("loveChart"),{
+          type:"radar",
+          data:{ labels:["情慾(火)","情感(水)","控制(土)","冒險(金)","創意(木)"],
+            datasets:[{ label:"性愛能量", data:data.scores,
+              backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
+        });
 
-      if(data.match >= 80){ showCongrats(); }
-    }
-
-    function showCongrats(){
-      const popup=congratsPopup;
-      popup.style.display="flex";
-      for(let i=0;i<30;i++){
-        const c=document.createElement("div");
-        c.className="confetti";
-        c.style.left=Math.random()*100+"vw";
-        c.style.background=["#f87171","#34d399","#60a5fa","#fbbf24","#a78bfa"][Math.random()*5|0];
-        c.style.animationDuration=(2+Math.random()*3)+"s";
-        popup.appendChild(c);
-        setTimeout(()=>c.remove(),3000);
+      } catch(err){
+        alert("API 錯誤: " + err.message);
+        console.error(err);
       }
-      setTimeout(()=>{popup.style.display="none";},5000);
-    }
+    });
   </script>
 </body>
 </html>
