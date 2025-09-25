@@ -33,7 +33,7 @@ B方：${bBeast}／${bKin}／${bBranch}
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      response_format: { type: "json_object" }  // 🔥 強制回傳 JSON
+      response_format: { type: "json_object" }
     });
 
     const content = completion.choices[0].message.content;
@@ -47,7 +47,7 @@ B方：${bBeast}／${bKin}／${bBranch}
 
     res.status(200).json(parsed);
   } catch (err) {
-    console.error(err);
+    console.error("OpenAI API error:", err);
     res.status(500).json({ error: "AI_error", detail: err.message });
   }
 }
