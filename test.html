@@ -17,6 +17,13 @@
 </head>
 <body class="p-6 bg-gray-50">
 
+  <!-- 回首頁 -->
+  <div class="mb-6 text-center">
+    <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700">
+      ⬅️ 回首頁
+    </a>
+  </div>
+
   <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析</h1>
 
   <!-- A方 -->
@@ -45,18 +52,15 @@
 
   <!-- 結果 -->
   <div id="result" class="mt-6 hidden">
-    <!-- 雷達圖 -->
     <div class="mb-4">
       <canvas id="loveChart" width="400" height="400"></canvas>
     </div>
-    <!-- 契合度條 -->
     <div class="mb-4">
       <label class="font-bold">契合度：</label>
       <div class="w-full bg-gray-200 rounded-full h-4">
         <div id="matchBar" class="bg-green-500 h-4 rounded-full text-right pr-2 text-xs text-white">0%</div>
       </div>
     </div>
-    <!-- 分析文字 -->
     <div id="analysisText" class="mt-4 p-3 bg-white shadow rounded prose max-w-none"></div>
   </div>
 
@@ -67,6 +71,10 @@
       <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
     </div>
   </div>
+
+  <!-- 音效 -->
+  <audio id="goodMusic" src="good.mp3"></audio>
+  <audio id="badMusic" src="bad.mp3"></audio>
 
   <script>
     const beasts = ["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
@@ -147,15 +155,16 @@
               backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
         });
 
-        // 更新契合度條
+        // 契合度條
         const bar = document.getElementById("matchBar");
         bar.style.width = data.match + "%";
         bar.innerText = data.match + "%";
         bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
           (data.match >= 80 ? "bg-green-500" : data.match >= 50 ? "bg-yellow-500" : "bg-red-500");
 
-        // 契合度高 → 彩帶特效
-        if(data.match >= 80){ showCongrats(); }
+        // 音樂 + 彩帶
+        if(data.match >= 80){ playMusic("good"); showCongrats(); }
+        else if(data.match < 50){ playMusic("bad"); }
 
       } catch(err){
         outputDiv.innerHTML = "❌ 錯誤：" + err.message;
@@ -163,7 +172,6 @@
       }
     });
 
-    // 彩帶 + 恭喜彈窗
     function showCongrats(){
       const popup=congratsPopup;
       popup.style.display="flex";
@@ -177,6 +185,12 @@
         setTimeout(()=>c.remove(),3000);
       }
       setTimeout(()=>{popup.style.display="none";},5000);
+    }
+
+    function playMusic(type){
+      goodMusic.pause(); badMusic.pause();
+      if(type==="good"){goodMusic.currentTime=0;goodMusic.play();}
+      else{badMusic.currentTime=0;badMusic.play();}
     }
   </script>
 </body>
