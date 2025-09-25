@@ -3,217 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>18禁契合度測試</title>
+  <title>感情卜卦分析</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.4.1/html-docx.js"></script>
-  <style>
-    .loading-dots::after { content: '...'; animation: dots 1.5s steps(3, end) infinite; }
-    @keyframes dots {
-      0%,20% { content:'' } 40% { content:'.' } 60% { content:'..' } 80%,100% { content:'...' }
-    }
-  </style>
 </head>
-<body class="bg-gradient-to-b from-gray-50 to-pink-100 text-gray-800 min-h-screen flex flex-col items-center py-10">
+<body class="bg-gradient-to-b from-pink-50 to-orange-50 text-gray-800 min-h-screen flex flex-col items-center py-10">
 
-  <h1 class="text-3xl font-bold text-pink-700 mb-6">🔮 契合度分析系統</h1>
+  <h1 class="text-4xl font-extrabold text-pink-700 mb-8">💖 感情卜卦分析</h1>
 
-  <!-- 今日農曆與節氣資訊 -->
-  <div class="p-4 mb-6 bg-pink-50 border border-pink-200 rounded-lg shadow w-3/4">
-    <div id="lunar-date" class="text-pink-700 font-bold"></div>
-    <div id="gan-zhi" class="text-gray-700 mt-1"></div>
-    <div id="season-name" class="text-lg font-semibold text-pink-600 mt-2"></div>
-    <div id="season-desc" class="text-gray-600"></div>
-    <div id="season-advice" class="text-green-700 mt-1"></div>
-  </div>
-
-  <!-- A 方 / B 方 -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 w-3/4">
-    <div class="p-4 bg-white rounded-xl shadow">
-      <h2 class="font-bold text-lg mb-2 text-pink-600">A 方</h2>
-      <select id="aBeast" class="w-full border p-2 rounded mb-2">
-        <option>青龍</option><option>朱雀</option><option>勾陳</option>
-        <option>螣蛇</option><option>白虎</option><option>玄武</option>
-      </select>
-      <select id="aKin" class="w-full border p-2 rounded mb-2">
-        <option>父母</option><option>兄弟</option><option>妻財</option>
-        <option>官鬼</option><option>子孫</option>
-      </select>
-      <select id="aBranch" class="w-full border p-2 rounded"></select>
-    </div>
-    <div class="p-4 bg-white rounded-xl shadow">
-      <h2 class="font-bold text-lg mb-2 text-pink-600">B 方</h2>
-      <select id="bBeast" class="w-full border p-2 rounded mb-2">
-        <option>青龍</option><option>朱雀</option><option>勾陳</option>
-        <option>螣蛇</option><option>白虎</option><option>玄武</option>
-      </select>
-      <select id="bKin" class="w-full border p-2 rounded mb-2">
-        <option>父母</option><option>兄弟</option><option>妻財</option>
-        <option>官鬼</option><option>子孫</option>
-      </select>
-      <select id="bBranch" class="w-full border p-2 rounded"></select>
-    </div>
-  </div>
-
-  <!-- 月支 / 日支 -->
-  <div class="flex gap-4 mb-4">
+  <!-- 月支日支選擇 -->
+  <div class="flex gap-6 mb-6">
     <div>
-      <label class="font-bold">月支：</label>
-      <select id="monthBranch" class="border p-2 rounded"></select>
+      <label class="block text-gray-700 font-bold mb-2">月支：</label>
+      <select id="month-branch" class="p-2 border rounded">
+        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
+        <option>辰</option><option>巳</option><option>午</option><option>未</option>
+        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
+      </select>
     </div>
     <div>
-      <label class="font-bold">日支：</label>
-      <select id="dayBranch" class="border p-2 rounded"></select>
+      <label class="block text-gray-700 font-bold mb-2">日支：</label>
+      <select id="day-branch" class="p-2 border rounded">
+        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
+        <option>辰</option><option>巳</option><option>午</option><option>未</option>
+        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
+      </select>
     </div>
   </div>
 
   <!-- 分析按鈕 -->
-  <button onclick="startAnalysis()"
-          class="mb-6 px-8 py-4 bg-pink-500 text-white text-lg rounded-2xl shadow hover:bg-pink-600 transition">
+  <button id="analyze-btn" class="px-8 py-4 rounded-2xl bg-pink-500 text-white text-lg shadow-md hover:bg-pink-600 transition">
     🚀 開始分析
   </button>
 
-  <!-- 進度條 -->
-  <div class="w-3/4 bg-gray-200 rounded-full h-6 mb-4">
-    <div id="progress-bar" class="bg-pink-500 h-6 rounded-full text-white text-sm flex items-center justify-center"
-         style="width:0%">0%</div>
+  <!-- 農民曆資訊卡 -->
+  <div class="w-3/4 bg-white rounded-xl shadow p-4 mt-8">
+    <h3 class="text-lg font-bold text-pink-600 mb-2">📅 農民曆資訊</h3>
+    <p id="solar-date" class="text-gray-700"></p>
+    <p id="lunar-date" class="text-gray-700"></p>
+    <p id="gan-zhi" class="text-gray-700 font-semibold"></p>
+    <p id="season-name" class="text-pink-600 font-semibold mt-2"></p>
+    <p id="season-desc" class="text-gray-600"></p>
+    <p id="season-advice" class="text-green-700"></p>
   </div>
-  <p id="loading-text" class="text-pink-600 font-bold mb-4"></p>
 
-  <!-- 契合度 -->
-  <div class="w-3/4 bg-white shadow rounded-xl p-4 mb-4">
-    <p class="font-bold mb-2">契合度：</p>
-    <div class="w-full bg-gray-200 rounded-full h-4">
-      <div id="match-bar" class="bg-green-500 h-4 rounded-full text-xs text-white text-right pr-2">0%</div>
+  <!-- 分析進度 -->
+  <div id="progress-box" class="w-3/4 mt-10 hidden">
+    <p class="text-lg font-bold text-pink-700 mb-2">分析中...</p>
+    <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+      <div id="progress-bar" class="bg-pink-500 h-6 text-white text-sm flex items-center justify-center" style="width:0%">0%</div>
     </div>
   </div>
 
-  <!-- 雷達圖 -->
-  <div class="w-3/4 bg-white shadow rounded-xl p-4 mb-4">
-    <h3 class="font-bold text-pink-600 mb-2">五行能量圖</h3>
-    <canvas id="loveChart" width="400" height="400"></canvas>
+  <!-- 結果區 -->
+  <div id="result-box" class="w-3/4 mt-10 hidden">
+    <h2 class="text-2xl font-bold text-pink-700 mb-4">🔮 分析結果</h2>
+    <p id="result-text" class="text-gray-800 leading-relaxed mb-6"></p>
+
+    <!-- 下載按鈕 -->
+    <div class="flex gap-4">
+      <button onclick="downloadFile('pdf')" class="px-6 py-3 bg-green-500 text-white rounded-lg shadow hover:bg-green-600">下載 PDF</button>
+      <button onclick="downloadFile('word')" class="px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">下載 Word</button>
+    </div>
   </div>
 
-  <!-- 分析結果 -->
-  <div id="result" class="w-3/4 bg-white shadow rounded-xl p-4 text-gray-700"></div>
+  <!-- 歡呼聲 -->
+  <audio id="cheer-sound" src="https://actions.google.com/sounds/v1/crowds/cheer.ogg"></audio>
 
-  <!-- 匯出按鈕 -->
-  <div id="download-section" class="mt-4 hidden flex gap-4">
-    <button id="downloadWord" class="px-4 py-2 bg-blue-500 text-white rounded">📄 下載 Word</button>
-    <button id="downloadPdf" class="px-4 py-2 bg-green-600 text-white rounded">📕 下載 PDF</button>
-  </div>
+  <script>
+    // -------------------------
+    // 1. 農曆 + 干支 + 節氣
+    // -------------------------
+    async function fetchLunarDate(y, m, d){
+      try{
+        const r = await fetch(`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`);
+        const data = await r.json();
 
-  <!-- 聲音 -->
-  <audio id="success-audio" hidden><source src="pic/success.mp3" type="audio/mpeg"></audio>
-  <audio id="fail-audio" hidden><source src="pic/fail.mp3" type="audio/mpeg"></audio>
+        document.getElementById("solar-date").innerText = `國曆：${y}年${m}月${d}日`;
+        document.getElementById("lunar-date").innerText = "農曆：" + data.text;
 
-<script>
-const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-function fillSelect(id, arr){ document.getElementById(id).innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); }
-fillSelect("aBranch", branches); fillSelect("bBranch", branches); fillSelect("dayBranch", branches); fillSelect("monthBranch", branches);
+        const match = data.text.match(/(.{2}年)(.{2}月)?(.{2}日)?/);
+        let yearGanZhi = match && match[1] ? match[1].replace("年","") : "未知";
+        let monthGanZhi = match && match[2] ? match[2].replace("月","") : "未知";
+        let dayGanZhi = match && match[3] ? match[3].replace("日","") : "未知";
 
-// 預設今天的日支 & 月支
-const today = new Date();
-document.getElementById("dayBranch").value = branches[today.getDate()%12];
-document.getElementById("monthBranch").value = branches[today.getMonth()%12];
+        document.getElementById("gan-zhi").innerText =
+          `干支：${yearGanZhi}年 ${monthGanZhi}月 ${dayGanZhi}日`;
 
-// ===== 農曆 =====
-async function fetchLunarDate(y,m,d){
-  try{
-    const r=await fetch(`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`);
-    const data=await r.json();
-    document.getElementById("lunar-date").innerText = "📅 農曆：" + data.text;
+      }catch(err){
+        document.getElementById("solar-date").innerText = `國曆：${y}年${m}月${d}日`;
+        document.getElementById("lunar-date").innerText = `農曆：讀取失敗`;
+        document.getElementById("gan-zhi").innerText = "干支：甲子年 甲子月 甲子日";
+      }
+    }
 
-    const yearMatch=data.text.match(/(.{2})年/);
-    const monthMatch=data.text.match(/(.{2})月/);
-    const dayMatch=data.text.match(/(.{2})日/);
-    let yearGanZhi=yearMatch?yearMatch[1]:"未知";
-    let monthGanZhi=monthMatch?monthMatch[1]:"未知";
-    let dayGanZhi=dayMatch?dayMatch[1]:"未知";
+    const today = new Date();
+    fetchLunarDate(today.getFullYear(), today.getMonth()+1, today.getDate());
 
-    document.getElementById("gan-zhi").innerText=`🧭 干支：${yearGanZhi}年 ${monthGanZhi}月 ${dayGanZhi}日`;
-    window.lunarData={yearGanZhi,monthGanZhi,dayGanZhi,lunarText:data.text};
-  }catch{
-    document.getElementById("lunar-date").innerText=`📅 農曆：${y}年${m}月${d}日（假資料）`;
-    document.getElementById("gan-zhi").innerText="🧭 干支：甲子年 甲子月 甲子日";
-  }
-}
-fetchLunarDate(today.getFullYear(),today.getMonth()+1,today.getDate());
+    // -------------------------
+    // 2. 分析流程
+    // -------------------------
+    document.getElementById("analyze-btn").addEventListener("click", async () => {
+      document.getElementById("progress-box").classList.remove("hidden");
+      let bar = document.getElementById("progress-bar");
+      let progress = 0;
 
-// ===== 節氣 =====
-const jieqi=[
-  { name:"立春",date:"2025-02-03",desc:"春回大地，萬物萌芽。",advice:"多接觸陽光，制定小目標。" },
-  { name:"雨水",date:"2025-02-18",desc:"冰雪消融，雨水漸多。",advice:"保持運動與規律作息。" },
-  { name:"驚蟄",date:"2025-03-05",desc:"春雷乍響，萬物甦醒。",advice:"用寫日記、深呼吸方式平穩內心。" },
-  { name:"春分",date:"2025-03-20",desc:"晝夜均分，陰陽平衡。",advice:"適合靜坐、茶飲，保持內外和諧。" },
-  { name:"清明",date:"2025-04-04",desc:"春暖花開，慎終追遠。",advice:"透過掃墓祭祖轉化情緒。" },
-  { name:"穀雨",date:"2025-04-20",desc:"雨生百穀，萬物茂盛。",advice:"練習耐心，給自己時間醞釀成果。" },
-  { name:"立夏",date:"2025-05-05",desc:"夏季伊始，陽氣漸盛。",advice:"保持飲食清淡，適度運動。" },
-  { name:"小滿",date:"2025-05-21",desc:"穀物漸滿，陽光充足。",advice:"保持謙遜，繼續進步。" },
-  { name:"芒種",date:"2025-06-05",desc:"農忙時節，收穫開始。",advice:"調整呼吸，專注當下。" },
-  { name:"夏至",date:"2025-06-21",desc:"白晝最長，陽極之時。",advice:"早睡早起，保持涼爽心境。" },
-  { name:"小暑",date:"2025-07-07",desc:"氣溫上升，暑氣初臨。",advice:"多喝水，少爭辯，多理解。" },
-  { name:"大暑",date:"2025-07-22",desc:"一年最熱，注意養生。",advice:"保持冷靜，適度休息與靜養。" },
-  { name:"立秋",date:"2025-08-07",desc:"秋天開始，暑退涼來。",advice:"多親近大自然，練習感恩。" },
-  { name:"處暑",date:"2025-08-23",desc:"炎熱漸退，氣候轉涼。",advice:"多與朋友聚會，避免孤寂。" },
-  { name:"白露",date:"2025-09-07",desc:"露水漸白，天氣轉涼。",advice:"安排短途旅行或抒發情感。" },
-  { name:"秋分",date:"2025-09-23",desc:"晝夜均分，能量平衡。",advice:"用冥想與運動調整內心平衡。" },
-  { name:"寒露",date:"2025-10-08",desc:"氣溫下降，露更寒冷。",advice:"多曬太陽，與人保持互動。" },
-  { name:"霜降",date:"2025-10-23",desc:"霜氣初降，冬意漸濃。",advice:"補充營養，安排適度活動。" },
-  { name:"立冬",date:"2025-11-07",desc:"冬季開始，萬物收藏。",advice:"保持社交，避免過度封閉。" },
-  { name:"小雪",date:"2025-11-22",desc:"天寒地凍，初雪可見。",advice:"學習小確幸，營造溫馨氛圍。" },
-  { name:"大雪",date:"2025-12-07",desc:"雪勢漸大，寒意深重。",advice:"補充溫熱食物，保持心境溫暖。" },
-  { name:"冬至",date:"2025-12-22",desc:"白晝最短，陰極之時。",advice:"與家人團聚，增進心靈能量。" },
-  { name:"小寒",date:"2026-01-05",desc:"寒氣漸深，注意保暖。",advice:"適合靜思、規劃新年方向。" },
-  { name:"大寒",date:"2026-01-20",desc:"一年最冷，養精蓄銳。",advice:"多做伸展與運動，保持活力。" }
-];
-const todayStr=today.toISOString().split("T")[0];
-let current=jieqi[0]; for(let i=0;i<jieqi.length;i++){ if(todayStr>=jieqi[i].date) current=jieqi[i]; }
-document.getElementById("season-name").innerText="🌿 節氣："+current.name;
-document.getElementById("season-desc").innerText=current.desc;
-document.getElementById("season-advice").innerText="💡 養生建議："+current.advice;
+      const interval = setInterval(() => {
+        progress += 5;
+        if(progress > 100) progress = 100;
+        bar.style.width = progress + "%";
+        bar.innerText = progress + "%";
+      }, 200);
 
-// ===== 分析 =====
-let chart, latestText="";
-async function startAnalysis(){
-  let progress=0;const bar=document.getElementById("progress-bar");
-  const result=document.getElementById("result");const matchBar=document.getElementById("match-bar");
-  const loadingText=document.getElementById("loading-text");
-  result.textContent="";loadingText.textContent="分析中";loadingText.classList.add("loading-dots");
-  document.getElementById("download-section").classList.add("hidden");
+      // 模擬 API 分析
+      setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById("progress-box").classList.add("hidden");
+        document.getElementById("result-box").classList.remove("hidden");
 
-  const apiUrl=window.location.hostname.includes("vercel.app")?"/api/analyze":"https://love.vercel.app/api/analyze";
+        const score = Math.floor(Math.random()*100);
+        document.getElementById("result-text").innerText =
+          `契合度：${score}%\n這段關係的能量顯示出...（示範文字）`;
 
-  const interval=setInterval(()=>{
-    if(progress>=100){
-      clearInterval(interval);loadingText.textContent="";
-      fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-        aBeast:aBeast.value,aKin:aKin.value,aBranch:aBranch.value,
-        bBeast:bBeast.value,bKin:bKin.value,bBranch:bBranch.value,
-        yearGanZhi:window.lunarData?.yearGanZhi||"未知",
-        monthGanZhi:window.lunarData?.monthGanZhi||"未知",
-        dayGanZhi:window.lunarData?.dayGanZhi||"未知"
-      })})
-      .then(res=>res.json()).then(data=>{
-        const score=data.match??Math.floor(Math.random()*101);
-        matchBar.style.width=score+"%";matchBar.textContent=score+"%";
-        matchBar.className="h-4 rounded-full text-xs text-white text-right pr-2 "+(score>=80?"bg-green-500":score>=50?"bg-yellow-500":"bg-red-500");
-        latestText=data.text||"⚠️ 沒有收到分析內容";
-        result.innerHTML=`<p class="font-semibold">📅 起卦日期：${window.lunarData?.lunarText||""}（${window.lunarData?.yearGanZhi}年 ${window.lunarData?.monthGanZhi}月 ${window.lunarData?.dayGanZhi}日）</p><div class="mt-2">${latestText}</div>`;
-        if(chart)chart.destroy();
-        chart=new Chart(loveChart,{type:"radar",data:{labels:["情慾(火)","情感(水)","控制(土)","冒險(金)","創意(木)"],datasets:[{label:"性愛能量",data:data.scores||[20,20,20,20,20],backgroundColor:"rgba(255,99,132,0.2)",borderColor:"rgb(255,99,132)"}]}});
-        if(score>=80){playAudio("success-audio");confetti({particleCount:200,spread:100,origin:{y:0.6}});}else if(score<=40){playAudio("fail-audio");}
-        document.getElementById("download-section").classList.remove("hidden");
-      }).catch(err=>{result.textContent="❌ 分析失敗："+err.message;});
-    }else{progress++;bar.style.width=progress+"%";bar.textContent=progress+"%";}
-  },40);
-}
-function playAudio(id){const audio=document.getElementById(id);if(audio){audio.currentTime=0;audio.play();}}
+        if(score > 80){
+          confetti();
+          document.getElementById("cheer-sound").play();
+        }
+      }, 4000);
+    });
 
-downloadWord.addEventListener("click",()=>{const blob=window.htmlDocx.asBlob("<html><body>"+latestText+"</body></html>");const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="性愛分析.docx";link.click();});
-downloadPdf.addEventListener("click",()=>{const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text(latestText.replace(/## /g,"").replace(/\n/g,"\n"),10,10);doc.save("性愛分析.pdf");});
-</script>
+    // -------------------------
+    // 3. 匯出 PDF / Word
+    // -------------------------
+    function downloadFile(type){
+      const text = document.getElementById("result-text").innerText;
+      if(type === "pdf"){
+        const blob = new Blob([text], {type:"application/pdf"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "分析結果.pdf";
+        link.click();
+      }else{
+        const blob = new Blob([text], {type:"application/msword"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "分析結果.doc";
+        link.click();
+      }
+    }
+  </script>
 </body>
 </html>
