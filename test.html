@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>18禁契合度測試</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.4.1/html-docx.js"></script>
 </head>
 <body class="bg-gradient-to-b from-gray-50 to-pink-100 text-gray-800 min-h-screen flex flex-col items-center py-10">
 
   <h1 class="text-3xl font-bold text-pink-700 mb-6">🔮 契合度分析系統</h1>
 
-  <!-- A 方 / B 方選單 -->
+  <!-- A 方 / B 方 -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 w-3/4">
     <div class="p-4 bg-white rounded-xl shadow">
       <h2 class="font-bold text-lg mb-2 text-pink-600">A 方</h2>
@@ -23,11 +26,7 @@
         <option>父母</option><option>兄弟</option><option>妻財</option>
         <option>官鬼</option><option>子孫</option>
       </select>
-      <select id="aBranch" class="w-full border p-2 rounded">
-        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
-        <option>辰</option><option>巳</option><option>午</option><option>未</option>
-        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
-      </select>
+      <select id="aBranch" class="w-full border p-2 rounded"></select>
     </div>
 
     <div class="p-4 bg-white rounded-xl shadow">
@@ -40,11 +39,7 @@
         <option>父母</option><option>兄弟</option><option>妻財</option>
         <option>官鬼</option><option>子孫</option>
       </select>
-      <select id="bBranch" class="w-full border p-2 rounded">
-        <option>子</option><option>丑</option><option>寅</option><option>卯</option>
-        <option>辰</option><option>巳</option><option>午</option><option>未</option>
-        <option>申</option><option>酉</option><option>戌</option><option>亥</option>
-      </select>
+      <select id="bBranch" class="w-full border p-2 rounded"></select>
     </div>
   </div>
 
@@ -52,16 +47,23 @@
   <div class="flex gap-4 mb-6">
     <div>
       <label class="font-bold">日支：</label>
-      <select id="dayBranch" class="border p-2 rounded">
-        <option>子</option><option>丑</option>...<option>亥</option>
-      </select>
+      <select id="dayBranch" class="border p-2 rounded"></select>
     </div>
     <div>
       <label class="font-bold">月支：</label>
-      <select id="monthBranch" class="border p-2 rounded">
-        <option>子</option><option>丑</option>...<option>亥</option>
-      </select>
+      <select id="monthBranch" class="border p-2 rounded"></select>
     </div>
+  </div>
+
+  <!-- 農民曆 -->
+  <div class="w-3/4 p-4 bg-white rounded-xl shadow mb-6">
+    <h2 id="season-name" class="text-xl font-bold text-pink-600 mb-2">🌿 今日節氣</h2>
+    <p id="today-date" class="text-gray-700"></p>
+    <p id="lunar-date" class="text-gray-700"></p>
+    <p id="season-desc" class="text-gray-600 mt-2"></p>
+    <p id="mood" class="text-pink-600 mt-2"></p>
+    <p id="advice" class="text-gray-600 mt-2"></p>
+    <p id="next-season" class="text-gray-500 mt-2"></p>
   </div>
 
   <!-- 進度條 -->
@@ -70,8 +72,22 @@
          style="width:0%">0%</div>
   </div>
 
+  <!-- 契合度 -->
+  <div class="w-3/4 bg-white shadow rounded-xl p-4 mb-4">
+    <p class="font-bold mb-2">契合度：</p>
+    <div class="w-full bg-gray-200 rounded-full h-4">
+      <div id="match-bar" class="bg-green-500 h-4 rounded-full text-xs text-white text-right pr-2">0%</div>
+    </div>
+  </div>
+
+  <!-- 雷達圖 -->
+  <div class="w-3/4 bg-white shadow rounded-xl p-4 mb-4">
+    <h3 class="font-bold text-pink-600 mb-2">五行能量圖</h3>
+    <canvas id="loveChart" width="400" height="400"></canvas>
+  </div>
+
   <!-- 分析結果 -->
-  <div id="result" class="text-lg text-gray-700 font-semibold mt-4"></div>
+  <div id="result" class="w-3/4 bg-white shadow rounded-xl p-4 text-gray-700"></div>
 
   <!-- 分析按鈕 -->
   <button onclick="startAnalysis()"
@@ -79,10 +95,13 @@
     開始分析
   </button>
 
+  <!-- 下載按鈕（初始隱藏） -->
+  <div id="download-section" class="mt-4 hidden flex gap-4">
+    <button id="downloadWord" class="px-4 py-2 bg-blue-500 text-white rounded">📄 下載 Word</button>
+    <button id="downloadPdf" class="px-4 py-2 bg-green-600 text-white rounded">📕 下載 PDF</button>
+  </div>
+
   <!-- 聲音播放器 -->
-  <audio id="bg-audio" autoplay loop hidden>
-    <source src="pic/bg-music.mp3" type="audio/mpeg">
-  </audio>
   <audio id="success-audio" hidden>
     <source src="pic/success.mp3" type="audio/mpeg">
   </audio>
@@ -91,22 +110,36 @@
   </audio>
 
   <script>
-    function playAudio(id) {
-      const audio = document.getElementById(id);
-      if (audio) { audio.currentTime = 0; audio.play(); }
-    }
+    const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+    function fillSelect(id, arr){ const sel=document.getElementById(id); sel.innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); }
+    fillSelect("aBranch", branches);
+    fillSelect("bBranch", branches);
+    fillSelect("dayBranch", branches);
+    fillSelect("monthBranch", branches);
 
+    // 預設今天的日支、月支
+    const today = new Date();
+    const monthIndex = today.getMonth() % 12;
+    const dayIndex = today.getDate() % 12;
+    document.getElementById("dayBranch").value = branches[dayIndex];
+    document.getElementById("monthBranch").value = branches[monthIndex];
+
+    let chart, latestText = "";
+
+    // 分析流程
     async function startAnalysis() {
       let progress = 0;
       const bar = document.getElementById("progress-bar");
       const result = document.getElementById("result");
+      const matchBar = document.getElementById("match-bar");
 
       result.textContent = "正在分析中...";
+      document.getElementById("download-section").classList.add("hidden");
+
       const interval = setInterval(() => {
         if (progress >= 100) {
           clearInterval(interval);
 
-          // 呼叫 API
           fetch("/api/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -123,20 +156,43 @@
           })
           .then(res => res.json())
           .then(data => {
-            const score = data.score ?? Math.floor(Math.random()*101);
-            bar.style.width = score + "%";
-            bar.textContent = score + "%";
+            const score = data.match ?? Math.floor(Math.random()*101);
 
+            // 契合度
+            matchBar.style.width = score + "%";
+            matchBar.textContent = score + "%";
+            matchBar.className = "h-4 rounded-full text-xs text-white text-right pr-2 " +
+              (score >= 80 ? "bg-green-500" : score >= 50 ? "bg-yellow-500" : "bg-red-500");
+
+            // 分析文字
+            latestText = data.text || "⚠️ 沒有收到分析內容";
+            result.innerHTML = latestText;
+
+            // 雷達圖
+            if (chart) chart.destroy();
+            chart = new Chart(document.getElementById("loveChart"), {
+              type: "radar",
+              data: {
+                labels: ["情慾(火)", "情感(水)", "控制(土)", "冒險(金)", "創意(木)"],
+                datasets: [{
+                  label: "性愛能量",
+                  data: data.scores || [20,20,20,20,20],
+                  backgroundColor: "rgba(255,99,132,0.2)",
+                  borderColor: "rgb(255,99,132)"
+                }]
+              }
+            });
+
+            // 彩帶 + 聲音
             if (score >= 80) {
-              result.textContent = "🎉 契合度超高！天作之合！\n" + (data.text || "");
               playAudio("success-audio");
               confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
             } else if (score <= 40) {
-              result.textContent = "💔 契合度偏低，需要更多磨合。\n" + (data.text || "");
               playAudio("fail-audio");
-            } else {
-              result.textContent = "🤔 中等契合度，可以嘗試更深入交流。\n" + (data.text || "");
             }
+
+            // 顯示下載按鈕
+            document.getElementById("download-section").classList.remove("hidden");
           })
           .catch(err => {
             result.textContent = "❌ 分析失敗：" + err.message;
@@ -149,6 +205,55 @@
         }
       }, 40);
     }
+
+    // 播放音效
+    function playAudio(id){ const audio=document.getElementById(id); if(audio){ audio.currentTime=0; audio.play(); } }
+
+    // Word / PDF 下載
+    document.getElementById("downloadWord").addEventListener("click", ()=>{
+      const blob = window.htmlDocx.asBlob("<html><body>"+latestText+"</body></html>");
+      const link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="性愛分析.docx";
+      link.click();
+    });
+    document.getElementById("downloadPdf").addEventListener("click", ()=>{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text(latestText.replace(/## /g,"").replace(/\n/g,"\n"), 10, 10);
+      doc.save("性愛分析.pdf");
+    });
+
+    // ====== 農民曆 ======
+    async function fetchLunarPrimary(y,m,d){
+      const url=`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`;
+      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
+    }
+    async function fetchLunarBackup(y,m,d){
+      const url=`https://www.sojson.com/open/api/lunar/json.shtml?date=${y}-${m}-${d}`;
+      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
+    }
+    async function fetchLunarDate(y,m,d){
+      try{const data=await fetchLunarPrimary(y,m,d);
+        document.getElementById("lunar-date").innerText="農曆："+data.text;
+      }catch(err){
+        try{const b=await fetchLunarBackup(y,m,d);
+          document.getElementById("lunar-date").innerText="農曆："+b.data.cnmonth+b.data.cnday;
+        }catch{document.getElementById("lunar-date").innerText=`農曆：${y}年${m}月${d}日（假資料）`;}
+      }
+    }
+
+    // 初始化日期/節氣
+    const yyyy = today.getFullYear();
+    const mm = today.getMonth()+1;
+    const dd = today.getDate();
+    document.getElementById("today-date").innerText = `國曆：${yyyy}年${mm}月${dd}日`;
+    fetchLunarDate(yyyy,mm,dd);
+    document.getElementById("season-name").innerText = "🌿 今日節氣";
+    document.getElementById("season-desc").innerText = "今天能量平衡，適合占卜與分析。";
+    document.getElementById("mood").innerText = "💭 心情傾向：宜冷靜、慎思。";
+    document.getElementById("advice").innerText = "保持平衡，避免過度勞累。";
+    document.getElementById("next-season").innerText = "📅 下一個節氣：自動計算中...";
   </script>
 </body>
 </html>
