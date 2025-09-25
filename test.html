@@ -46,16 +46,17 @@
   <!-- 日月支 -->
   <div class="flex gap-4 mb-6">
     <div>
-      <label class="font-bold">日支：</label>
-      <select id="dayBranch" class="border p-2 rounded"></select>
-    </div>
-    <div>
+      <div>
       <label class="font-bold">月支：</label>
       <select id="monthBranch" class="border p-2 rounded"></select>
     </div>
+      <label class="font-bold">日支：</label>
+      <select id="dayBranch" class="border p-2 rounded"></select>
+    </div>
+    
   </div>
 
-  <!-- 農民曆 -->
+  <!-- 農民曆 / 節氣 -->
   <div class="w-3/4 p-4 bg-white rounded-xl shadow mb-6">
     <h2 id="season-name" class="text-xl font-bold text-pink-600 mb-2">🌿 今日節氣</h2>
     <p id="today-date" class="text-gray-700"></p>
@@ -110,23 +111,96 @@
   </audio>
 
   <script>
+    // ==================== 地支 ====================
     const branches = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-    function fillSelect(id, arr){ const sel=document.getElementById(id); sel.innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); }
+    function fillSelect(id, arr){ 
+      const sel=document.getElementById(id); 
+      sel.innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); 
+    }
     fillSelect("aBranch", branches);
     fillSelect("bBranch", branches);
     fillSelect("dayBranch", branches);
     fillSelect("monthBranch", branches);
 
-    // 預設今天的日支、月支
+    // 自動帶入今日的日支 & 月支
     const today = new Date();
-    const monthIndex = today.getMonth() % 12;
     const dayIndex = today.getDate() % 12;
+    const monthIndex = today.getMonth() % 12;
     document.getElementById("dayBranch").value = branches[dayIndex];
     document.getElementById("monthBranch").value = branches[monthIndex];
 
     let chart, latestText = "";
 
-    // 分析流程
+    // ==================== 節氣 ====================
+    const jieqi = [
+      { name:"立春",date:"2025-02-03",desc:"春回大地，萬物萌芽。",mood:"迎接新開始，容易躁動不安。",advice:"多接觸陽光，制定小目標，讓能量有方向。" },
+      { name:"雨水",date:"2025-02-18",desc:"冰雪消融，雨水漸多。",mood:"情緒敏感，容易受外界影響。",advice:"保持運動與規律作息，避免過度憂鬱。" },
+      { name:"驚蟄",date:"2025-03-05",desc:"春雷乍響，萬物甦醒。",mood:"情緒突然高漲或低落。",advice:"用寫日記、深呼吸方式平穩內心。" },
+      { name:"春分",date:"2025-03-20",desc:"晝夜均分，陰陽平衡。",mood:"情緒趨於平衡，但仍有隱藏焦慮。",advice:"適合靜坐、茶飲，保持內外和諧。" },
+      { name:"清明",date:"2025-04-04",desc:"春暖花開，慎終追遠。",mood:"思念情緒明顯，容易觸景傷情。",advice:"透過掃墓祭祖轉化情緒，與家人交流支持。" },
+      { name:"穀雨",date:"2025-04-20",desc:"雨生百穀，萬物茂盛。",mood:"積極性高，但容易急躁。",advice:"練習耐心，給自己時間醞釀成果。" },
+      { name:"立夏",date:"2025-05-05",desc:"夏季伊始，陽氣漸盛。",mood:"情緒容易亢奮或浮躁。",advice:"保持飲食清淡，進行適度運動釋放能量。" },
+      { name:"小滿",date:"2025-05-21",desc:"穀物漸滿，陽光充足。",mood:"情緒有滿足感，但也容易自滿。",advice:"提醒自己保持謙遜，繼續進步。" },
+      { name:"芒種",date:"2025-06-05",desc:"農忙時節，收穫開始。",mood:"容易焦慮，擔心趕不上節奏。",advice:"調整呼吸，專注當下，按部就班。" },
+      { name:"夏至",date:"2025-06-21",desc:"白晝最長，陽極之時。",mood:"精神亢奮，睡眠品質易受影響。",advice:"早睡早起，保持涼爽心境。" },
+      { name:"小暑",date:"2025-07-07",desc:"氣溫上升，暑氣初臨。",mood:"情緒煩躁，耐心不足。",advice:"多喝水，少爭辯，多理解。" },
+      { name:"大暑",date:"2025-07-22",desc:"一年最熱，注意養生。",mood:"容易情緒爆發或身心疲倦。",advice:"保持冷靜，適度休息與靜養。" },
+      { name:"立秋",date:"2025-08-07",desc:"秋天開始，暑退涼來。",mood:"帶有一絲失落與感傷。",advice:"多親近大自然，練習感恩。" },
+      { name:"處暑",date:"2025-08-23",desc:"炎熱漸退，氣候轉涼。",mood:"容易感到空虛或孤單。",advice:"多與朋友聚會，避免沉浸於孤寂。" },
+      { name:"白露",date:"2025-09-07",desc:"露水漸白，天氣轉涼。",mood:"情緒偏感傷，思鄉或思人。",advice:"安排短途旅行或抒發情感。" },
+      { name:"秋分",date:"2025-09-23",desc:"晝夜均分，能量平衡。",mood:"悲喜參半，容易反思過往。",advice:"用冥想與運動調整內心平衡。" },
+      { name:"寒露",date:"2025-10-08",desc:"氣溫下降，露更寒冷。",mood:"容易感到孤寂與冷清。",advice:"多曬太陽，與人保持溫暖互動。" },
+      { name:"霜降",date:"2025-10-23",desc:"霜氣初降，冬意漸濃。",mood:"情緒低落，缺乏動力。",advice:"補充營養，安排適度活動。" },
+      { name:"立冬",date:"2025-11-07",desc:"冬季開始，萬物收藏。",mood:"內心轉向內斂，思考變多。",advice:"保持社交，避免過度封閉自己。" },
+      { name:"小雪",date:"2025-11-22",desc:"天寒地凍，初雪可見。",mood:"容易覺得壓抑或沉重。",advice:"學習小確幸，營造溫馨氛圍。" },
+      { name:"大雪",date:"2025-12-07",desc:"雪勢漸大，寒意深重。",mood:"心情低沉，行動力下降。",advice:"補充溫熱食物，保持心境溫暖。" },
+      { name:"冬至",date:"2025-12-22",desc:"白晝最短，陰極之時。",mood:"容易孤獨感加重。",advice:"與家人團聚，增進心靈能量。" },
+      { name:"小寒",date:"2026-01-05",desc:"寒氣漸深，注意保暖。",mood:"心情沉靜，動力不足。",advice:"適合靜思、規劃新年方向。" },
+      { name:"大寒",date:"2026-01-20",desc:"一年最冷，養精蓄銳。",mood:"容易情緒僵化，缺乏彈性。",advice:"多做伸展與運動，保持活力。" }
+    ];
+
+    function updateSeason() {
+      const todayStr = today.toISOString().split("T")[0];
+      let currentSeason = jieqi[0], nextSeason = jieqi[0];
+      for(let i=0;i<jieqi.length;i++){
+        if(todayStr >= jieqi[i].date){
+          currentSeason = jieqi[i];
+          nextSeason = jieqi[i+1] || jieqi[0];
+        }
+      }
+      document.getElementById("season-name").innerText="🌿 "+currentSeason.name;
+      document.getElementById("season-desc").innerText=currentSeason.desc;
+      document.getElementById("mood").innerText="💭 心情傾向："+currentSeason.mood;
+      document.getElementById("advice").innerText=currentSeason.advice;
+      const nextDate=new Date(nextSeason.date);
+      const diffDays=Math.ceil((nextDate - today)/(1000*60*60*24));
+      document.getElementById("next-season").innerText=`📅 下一個節氣：${nextSeason.name}（還有 ${diffDays} 天）`;
+    }
+
+    // 顯示國曆 / 農曆
+    document.getElementById("today-date").innerText = `國曆：${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+    updateSeason();
+
+    async function fetchLunarPrimary(y,m,d){
+      const url=`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`;
+      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
+    }
+    async function fetchLunarBackup(y,m,d){
+      const url=`https://www.sojson.com/open/api/lunar/json.shtml?date=${y}-${m}-${d}`;
+      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
+    }
+    async function fetchLunarDate(y,m,d){
+      try{const data=await fetchLunarPrimary(y,m,d);
+        document.getElementById("lunar-date").innerText="農曆："+data.text;
+      }catch(err){
+        try{const b=await fetchLunarBackup(y,m,d);
+          document.getElementById("lunar-date").innerText="農曆："+b.data.cnmonth+b.data.cnday;
+        }catch{document.getElementById("lunar-date").innerText=`農曆：${y}年${m}月${d}日（假資料）`;}
+      }
+    }
+    fetchLunarDate(today.getFullYear(), today.getMonth()+1, today.getDate());
+
+    // ==================== 分析流程 ====================
     async function startAnalysis() {
       let progress = 0;
       const bar = document.getElementById("progress-bar");
@@ -223,37 +297,6 @@
       doc.text(latestText.replace(/## /g,"").replace(/\n/g,"\n"), 10, 10);
       doc.save("性愛分析.pdf");
     });
-
-    // ====== 農民曆 ======
-    async function fetchLunarPrimary(y,m,d){
-      const url=`https://lunar-calendar-api.netlify.app/v0/2/g2l?y=${y}&m=${m}&d=${d}&z=8&lang=zh`;
-      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
-    }
-    async function fetchLunarBackup(y,m,d){
-      const url=`https://www.sojson.com/open/api/lunar/json.shtml?date=${y}-${m}-${d}`;
-      const r=await fetch(url); if(!r.ok) throw new Error(); return await r.json();
-    }
-    async function fetchLunarDate(y,m,d){
-      try{const data=await fetchLunarPrimary(y,m,d);
-        document.getElementById("lunar-date").innerText="農曆："+data.text;
-      }catch(err){
-        try{const b=await fetchLunarBackup(y,m,d);
-          document.getElementById("lunar-date").innerText="農曆："+b.data.cnmonth+b.data.cnday;
-        }catch{document.getElementById("lunar-date").innerText=`農曆：${y}年${m}月${d}日（假資料）`;}
-      }
-    }
-
-    // 初始化日期/節氣
-    const yyyy = today.getFullYear();
-    const mm = today.getMonth()+1;
-    const dd = today.getDate();
-    document.getElementById("today-date").innerText = `國曆：${yyyy}年${mm}月${dd}日`;
-    fetchLunarDate(yyyy,mm,dd);
-    document.getElementById("season-name").innerText = "🌿 今日節氣";
-    document.getElementById("season-desc").innerText = "今天能量平衡，適合占卜與分析。";
-    document.getElementById("mood").innerText = "💭 心情傾向：宜冷靜、慎思。";
-    document.getElementById("advice").innerText = "保持平衡，避免過度勞累。";
-    document.getElementById("next-season").innerText = "📅 下一個節氣：自動計算中...";
   </script>
 </body>
 </html>
