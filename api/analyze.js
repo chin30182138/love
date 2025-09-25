@@ -33,10 +33,11 @@ B方：${bBeast}／${bKin}／${bBranch}
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      response_format: { type: "json_object" }  // 🔥 強制 JSON
+      response_format: { type: "json_object" }  // 🔥 強制回傳 JSON
     });
 
     const content = completion.choices[0].message.content;
+
     let parsed;
     try {
       parsed = JSON.parse(content);
