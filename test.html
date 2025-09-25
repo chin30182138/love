@@ -3,25 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>神獸人格 × 性愛五行中庸分析 (AI版)</title>
+  <title>神獸人格 × 性愛五行中庸分析 (測試版)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.4.1/html-docx.js"></script>
   <style>
     #congratsPopup { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; background: rgba(0,0,0,0.5); }
     #congratsPopup .box { background: white; padding: 2rem; border-radius: 1rem; text-align: center; animation: pop 0.5s ease; }
     @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
     .confetti { position: absolute; width: 10px; height: 20px; opacity: 0.8; animation: fall 3s linear infinite; }
     @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
-    #historyModal { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content: center; z-index: 60; }
-    #historyModal .content { background:white; max-height:80vh; overflow:auto; padding:1rem; border-radius:0.5rem; width:90%; max-width:800px; }
   </style>
 </head>
 <body class="p-6 bg-gray-50">
 
-  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析</h1>
+  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析 (假資料測試版)</h1>
 
   <!-- A方 -->
   <div class="mb-4">
@@ -45,10 +41,7 @@
     <label>月支 <select id="monthBranch"></select></label>
   </div>
 
-  <div class="flex gap-2 mb-4">
-    <button id="analyzeBtn" class="bg-red-600 text-white px-4 py-2 rounded">開始分析</button>
-    <button id="viewHistory" class="bg-gray-600 text-white px-4 py-2 rounded">📜 查看歷史</button>
-  </div>
+  <button id="analyzeBtn" class="bg-red-600 text-white px-4 py-2 rounded">開始分析</button>
 
   <!-- 結果 -->
   <div id="result" class="mt-6 hidden">
@@ -62,22 +55,6 @@
       </div>
     </div>
     <div id="analysisText" class="mt-4 p-3 bg-white shadow rounded prose max-w-none"></div>
-
-    <!-- 輸出按鈕 -->
-    <div class="mt-4 flex gap-2">
-      <button onclick="window.print()" class="bg-gray-600 text-white px-3 py-2 rounded">🖨️ 列印 / PDF</button>
-      <button id="downloadWord" class="bg-blue-600 text-white px-3 py-2 rounded">📄 下載 Word</button>
-      <button id="downloadPdf" class="bg-green-600 text-white px-3 py-2 rounded">📕 下載 PDF</button>
-    </div>
-  </div>
-
-  <!-- 歷史紀錄 Modal -->
-  <div id="historyModal" class="flex">
-    <div class="content">
-      <h2 class="text-xl font-bold mb-2">歷史紀錄</h2>
-      <div id="historyList" class="space-y-4"></div>
-      <button id="closeHistory" class="mt-4 bg-red-600 text-white px-3 py-2 rounded">關閉</button>
-    </div>
   </div>
 
   <!-- 恭喜彈窗 -->
@@ -87,10 +64,6 @@
       <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
     </div>
   </div>
-
-  <!-- 音樂 -->
-  <audio id="goodMusic" src="good.mp3"></audio>
-  <audio id="badMusic" src="bad.mp3"></audio>
 
   <script>
     const beasts=["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
@@ -103,36 +76,18 @@
     fill(aBranch,branch); fill(bBranch,branch);
     fill(dayBranch,branch); fill(monthBranch,branch);
 
-    let chart, latestText="", latestData={};
+    let chart;
 
-    // 分析按鈕
-    document.getElementById("analyzeBtn").addEventListener("click", async ()=>{
-      const payload = {
-        aBeast: aBeast.value, aKin: aKin.value, aBranch: aBranch.value,
-        bBeast: bBeast.value, bKin: bKin.value, bBranch: bBranch.value,
-        dayBranch: dayBranch.value, monthBranch: monthBranch.value
+    // 測試版：用假資料
+    document.getElementById("analyzeBtn").addEventListener("click", ()=>{
+      const data = {
+        text: "## 性愛場景與角色扮演\n- 禁忌場景：摩天大樓窗邊浪漫調情\n- 角色扮演：權力遊戲主僕情境\n\n## 性愛技巧與體位推薦\n- 深度擁抱交合\n- 語音催眠與角色互換\n\n## 性愛玩具與情境設置\n- 震動棒、絲質束縛配件\n- 燈光昏暗搭配感官剝奪\n\n## 劇本片段\n> A方：今晚，你只能聽我的命令。\n> B方：我願意被你完全掌控…",
+        scores: [8, 7, 9, 6, 8],
+        match: 85
       };
-
-      const res = await fetch("/api/analyze", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-
-      latestData = { ...payload, ...data, timestamp: new Date().toLocaleString() };
-      latestText = data.text;
-
-      // 儲存到 LocalStorage
-      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
-      history.unshift(latestData);
-      if(history.length > 20) history.pop(); // 最多存 20 筆
-      localStorage.setItem("analysisHistory", JSON.stringify(history));
-
       renderResult(data);
     });
 
-    // 渲染結果
     function renderResult(data){
       document.getElementById("result").classList.remove("hidden");
       document.getElementById("analysisText").innerHTML = marked.parse(data.text);
@@ -151,59 +106,9 @@
       bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
         (data.match >= 80 ? "bg-green-500" : data.match >= 50 ? "bg-yellow-500" : "bg-red-500");
 
-      if(data.match >= 80){ showCongrats(); playMusic("good"); }
-      else { playMusic("bad"); }
+      if(data.match >= 80){ showCongrats(); }
     }
 
-    // 歷史紀錄
-    document.getElementById("viewHistory").addEventListener("click", ()=>{
-      const modal = document.getElementById("historyModal");
-      const list = document.getElementById("historyList");
-      list.innerHTML = "";
-      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
-      if(history.length === 0){
-        list.innerHTML = "<p class='text-gray-600'>尚無紀錄</p>";
-      } else {
-        history.forEach((h,i)=>{
-          const div = document.createElement("div");
-          div.className="border p-2 rounded bg-gray-50";
-          div.innerHTML = `
-            <p class="text-sm text-gray-500">[${h.timestamp}] A:${h.aBeast}/${h.aKin}/${h.aBranch} × B:${h.bBeast}/${h.bKin}/${h.bBranch} ｜ 契合度:${h.match}%</p>
-            <button class="bg-blue-600 text-white px-2 py-1 mt-1 rounded" onclick='showHistory(${i})'>查看</button>
-          `;
-          list.appendChild(div);
-        });
-      }
-      modal.style.display="flex";
-    });
-
-    document.getElementById("closeHistory").addEventListener("click", ()=>{
-      document.getElementById("historyModal").style.display="none";
-    });
-
-    window.showHistory = function(index){
-      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
-      const h = history[index];
-      renderResult(h);
-      document.getElementById("historyModal").style.display="none";
-    };
-
-    // Word & PDF 下載
-    document.getElementById("downloadWord").addEventListener("click", ()=>{
-      const blob = window.htmlDocx.asBlob("<html><body>" + latestText + "</body></html>");
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "性愛分析.docx";
-      link.click();
-    });
-    document.getElementById("downloadPdf").addEventListener("click", ()=>{
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text(latestText.replace(/## /g,"").replace(/\n/g,"\n"), 10, 10);
-      doc.save("性愛分析.pdf");
-    });
-
-    // 恭喜彈窗
     function showCongrats(){
       const popup=congratsPopup;
       popup.style.display="flex";
@@ -217,12 +122,6 @@
         setTimeout(()=>c.remove(),3000);
       }
       setTimeout(()=>{popup.style.display="none";},5000);
-    }
-
-    function playMusic(type){
-      goodMusic.pause(); badMusic.pause();
-      if(type==="good"){goodMusic.currentTime=0;goodMusic.play();}
-      else{badMusic.currentTime=0;badMusic.play();}
     }
   </script>
 </body>
