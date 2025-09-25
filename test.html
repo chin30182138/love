@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>神獸人格 × 性愛五行中庸分析 (AI版)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.4.1/html-docx.js"></script>
+  <style>
+    #congratsPopup { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 50; background: rgba(0,0,0,0.5); }
+    #congratsPopup .box { background: white; padding: 2rem; border-radius: 1rem; text-align: center; animation: pop 0.5s ease; }
+    @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+    .confetti { position: absolute; width: 10px; height: 20px; opacity: 0.8; animation: fall 3s linear infinite; }
+    @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+    #historyModal { position: fixed; inset:0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content: center; z-index: 60; }
+    #historyModal .content { background:white; max-height:80vh; overflow:auto; padding:1rem; border-radius:0.5rem; width:90%; max-width:800px; }
+  </style>
+</head>
+<body class="p-6 bg-gray-50">
+
+  <h1 class="text-3xl font-bold text-center text-red-600 mb-6">AI 劇本分析</h1>
+
+  <!-- A方 -->
+  <div class="mb-4">
+    <h2>A方</h2>
+    <select id="aBeast"></select>
+    <select id="aKin"></select>
+    <select id="aBranch"></select>
+  </div>
+
+  <!-- B方 -->
+  <div class="mb-4">
+    <h2>B方</h2>
+    <select id="bBeast"></select>
+    <select id="bKin"></select>
+    <select id="bBranch"></select>
+  </div>
+
+  <!-- 日月支 -->
+  <div class="mb-4">
+    <label>日支 <select id="dayBranch"></select></label>
+    <label>月支 <select id="monthBranch"></select></label>
+  </div>
+
+  <div class="flex gap-2 mb-4">
+    <button id="analyzeBtn" class="bg-red-600 text-white px-4 py-2 rounded">開始分析</button>
+    <button id="viewHistory" class="bg-gray-600 text-white px-4 py-2 rounded">📜 查看歷史</button>
+  </div>
+
+  <!-- 結果 -->
+  <div id="result" class="mt-6 hidden">
+    <div class="mb-4">
+      <canvas id="loveChart" width="400" height="400"></canvas>
+    </div>
+    <div class="mb-4">
+      <label class="font-bold">契合度：</label>
+      <div class="w-full bg-gray-200 rounded-full h-4">
+        <div id="matchBar" class="bg-green-500 h-4 rounded-full text-right pr-2 text-xs text-white">0%</div>
+      </div>
+    </div>
+    <div id="analysisText" class="mt-4 p-3 bg-white shadow rounded prose max-w-none"></div>
+
+    <!-- 輸出按鈕 -->
+    <div class="mt-4 flex gap-2">
+      <button onclick="window.print()" class="bg-gray-600 text-white px-3 py-2 rounded">🖨️ 列印 / PDF</button>
+      <button id="downloadWord" class="bg-blue-600 text-white px-3 py-2 rounded">📄 下載 Word</button>
+      <button id="downloadPdf" class="bg-green-600 text-white px-3 py-2 rounded">📕 下載 PDF</button>
+    </div>
+  </div>
+
+  <!-- 歷史紀錄 Modal -->
+  <div id="historyModal" class="flex">
+    <div class="content">
+      <h2 class="text-xl font-bold mb-2">歷史紀錄</h2>
+      <div id="historyList" class="space-y-4"></div>
+      <button id="closeHistory" class="mt-4 bg-red-600 text-white px-3 py-2 rounded">關閉</button>
+    </div>
+  </div>
+
+  <!-- 恭喜彈窗 -->
+  <div id="congratsPopup" class="flex">
+    <div class="box">
+      <h2 class="text-2xl font-bold text-green-600">🎉 恭喜！</h2>
+      <p class="mt-2">能量契合度極高，今晚最佳拍檔！</p>
+    </div>
+  </div>
+
+  <!-- 音樂 -->
+  <audio id="goodMusic" src="good.mp3"></audio>
+  <audio id="badMusic" src="bad.mp3"></audio>
+
+  <script>
+    const beasts=["青龍","朱雀","勾陳","螣蛇","白虎","玄武"];
+    const kins=["父母","兄弟","妻財","官鬼","子孫","應位"];
+    const branch=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+
+    function fill(sel,arr){ sel.innerHTML=arr.map(x=>`<option>${x}</option>`).join(""); }
+    fill(aBeast,beasts); fill(bBeast,beasts);
+    fill(aKin,kins); fill(bKin,kins);
+    fill(aBranch,branch); fill(bBranch,branch);
+    fill(dayBranch,branch); fill(monthBranch,branch);
+
+    let chart, latestText="", latestData={};
+
+    // 分析按鈕
+    document.getElementById("analyzeBtn").addEventListener("click", async ()=>{
+      const payload = {
+        aBeast: aBeast.value, aKin: aKin.value, aBranch: aBranch.value,
+        bBeast: bBeast.value, bKin: bKin.value, bBranch: bBranch.value,
+        dayBranch: dayBranch.value, monthBranch: monthBranch.value
+      };
+
+      const res = await fetch("/api/analyze", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      latestData = { ...payload, ...data, timestamp: new Date().toLocaleString() };
+      latestText = data.text;
+
+      // 儲存到 LocalStorage
+      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
+      history.unshift(latestData);
+      if(history.length > 20) history.pop(); // 最多存 20 筆
+      localStorage.setItem("analysisHistory", JSON.stringify(history));
+
+      renderResult(data);
+    });
+
+    // 渲染結果
+    function renderResult(data){
+      document.getElementById("result").classList.remove("hidden");
+      document.getElementById("analysisText").innerHTML = marked.parse(data.text);
+
+      if(chart) chart.destroy();
+      chart = new Chart(document.getElementById("loveChart"),{
+        type:"radar",
+        data:{ labels:["情慾(火)","情感(水)","控制(土)","冒險(金)","創意(木)"],
+          datasets:[{ label:"性愛能量", data:data.scores,
+            backgroundColor:"rgba(255,99,132,0.2)", borderColor:"rgb(255,99,132)" }] }
+      });
+
+      const bar = document.getElementById("matchBar");
+      bar.style.width = data.match + "%";
+      bar.innerText = data.match + "%";
+      bar.className = "h-4 rounded-full text-right pr-2 text-xs text-white " +
+        (data.match >= 80 ? "bg-green-500" : data.match >= 50 ? "bg-yellow-500" : "bg-red-500");
+
+      if(data.match >= 80){ showCongrats(); playMusic("good"); }
+      else { playMusic("bad"); }
+    }
+
+    // 歷史紀錄
+    document.getElementById("viewHistory").addEventListener("click", ()=>{
+      const modal = document.getElementById("historyModal");
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
+      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
+      if(history.length === 0){
+        list.innerHTML = "<p class='text-gray-600'>尚無紀錄</p>";
+      } else {
+        history.forEach((h,i)=>{
+          const div = document.createElement("div");
+          div.className="border p-2 rounded bg-gray-50";
+          div.innerHTML = `
+            <p class="text-sm text-gray-500">[${h.timestamp}] A:${h.aBeast}/${h.aKin}/${h.aBranch} × B:${h.bBeast}/${h.bKin}/${h.bBranch} ｜ 契合度:${h.match}%</p>
+            <button class="bg-blue-600 text-white px-2 py-1 mt-1 rounded" onclick='showHistory(${i})'>查看</button>
+          `;
+          list.appendChild(div);
+        });
+      }
+      modal.style.display="flex";
+    });
+
+    document.getElementById("closeHistory").addEventListener("click", ()=>{
+      document.getElementById("historyModal").style.display="none";
+    });
+
+    window.showHistory = function(index){
+      let history = JSON.parse(localStorage.getItem("analysisHistory") || "[]");
+      const h = history[index];
+      renderResult(h);
+      document.getElementById("historyModal").style.display="none";
+    };
+
+    // Word & PDF 下載
+    document.getElementById("downloadWord").addEventListener("click", ()=>{
+      const blob = window.htmlDocx.asBlob("<html><body>" + latestText + "</body></html>");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "性愛分析.docx";
+      link.click();
+    });
+    document.getElementById("downloadPdf").addEventListener("click", ()=>{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text(latestText.replace(/## /g,"").replace(/\n/g,"\n"), 10, 10);
+      doc.save("性愛分析.pdf");
+    });
+
+    // 恭喜彈窗
+    function showCongrats(){
+      const popup=congratsPopup;
+      popup.style.display="flex";
+      for(let i=0;i<30;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.background=["#f87171","#34d399","#60a5fa","#fbbf24","#a78bfa"][Math.random()*5|0];
+        c.style.animationDuration=(2+Math.random()*3)+"s";
+        popup.appendChild(c);
+        setTimeout(()=>c.remove(),3000);
+      }
+      setTimeout(()=>{popup.style.display="none";},5000);
+    }
+
+    function playMusic(type){
+      goodMusic.pause(); badMusic.pause();
+      if(type==="good"){goodMusic.currentTime=0;goodMusic.play();}
+      else{badMusic.currentTime=0;badMusic.play();}
+    }
+  </script>
+</body>
+</html>
