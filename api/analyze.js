@@ -1,62 +1,64 @@
-// api/analyze.js
-import OpenAI from "openai";
+
+
+// api/analyze.js - V44.0 最終穩定版 (使用 OpenAI 官方 SDK)
+
+// 導入 OpenAI SDK
+const OpenAI = require('openai'); 
+
+// 確保 Vercel 環境變數中 OPENAI_API_KEY 已設定
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY; 
+// 核心修正：升級到 gpt-4o 終結超時和格式不穩定的問題
+const FINAL_MODEL = 'gpt-4o'; 
+
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY, 
+});
+
+const SYSTEM_PROMPT = "你是一位精通中國古代《神獸七十二型人格》理論的資深分析師。你的任務是根據用戶提供的『六獸-六親-地支』組合和情境，輸出深度且具體的分析報告。報告必須專業、嚴謹，並且字數至少 800 字。";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
-  }
+    if (!OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'Server configuration error: OPENAI_API_KEY is missing.' });
+    }
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const { aBeast, aKin, aBranch, bBeast, bKin, bBranch, dayBranch, monthBranch } = req.body || {};
+    try {
+        const { prompt } = req.body;
 
-  try {
-    // 呼叫 OpenAI 產生分析
-    const response = await client.responses.create({
-      model: "gpt-5",
-      input: `
-請你根據以下資料做性愛人格與五行分析：
-A方：${aBeast} × ${aKin} × ${aBranch}
-B方：${bBeast} × ${bKin} × ${bBranch}
-日支：${dayBranch}，月支：${monthBranch}
+        if (!prompt) {
+            return res.status(400).json({ error: 'Missing required parameter: prompt.' });
+        }
+        
+        // 呼叫 OpenAI API
+        const completion = await openai.chat.completions.create({
+            model: FINAL_MODEL,
+            messages: [
+                {
+                    role: "system",
+                    content: SYSTEM_PROMPT,
+                },
+                {
+                    role: "user",
+                    content: prompt,
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 3000,
+        });
 
-請輸出一段 Markdown 格式的完整分析，包括：
-- 性愛場景與角色扮演
-- 性愛技巧與體位推薦
-- 性愛玩具與情境設置
-- 綜合建議與能量解析
-並給出契合度評分（0~100）。
-      `,
-    });
+        // 成功響應
+        res.status(200).json(completion);
 
-    const aiText = response.output_text || "⚠️ AI 沒有回覆內容";
-
-    // 👉 隨機產生分數，避免前端沒有資料
-    const match = Math.floor(Math.random() * 101);
-    const scores = [
-      Math.floor(Math.random() * 100),
-      Math.floor(Math.random() * 100),
-      Math.floor(Math.random() * 100),
-      Math.floor(Math.random() * 100),
-      Math.floor(Math.random() * 100),
-    ];
-
-    res.status(200).json({
-      text: aiText,
-      match,
-      scores,
-    });
-  } catch (err) {
-    console.error("Analyze API Error:", err);
-
-    // 保底回傳，避免前端爆掉
-    res.status(200).json({
-      text: "⚠️ 系統發生錯誤，但這是測試用的假資料：建議嘗試更換題目或檢查 API 設定。",
-      match: 50,
-      scores: [50, 50, 50, 50, 50],
-    });
-  }
+    } catch (error) {
+        console.error("OpenAI API Error:", error.message || error);
+        
+        // 處理 API 請求失敗
+        res.status(500).json({ 
+            error: '分析服務器錯誤', 
+            detail: error.message || '無法連線到 AI 服務。' 
+        });
+    }
 }
