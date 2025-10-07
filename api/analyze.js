@@ -1,18 +1,10 @@
+// api/analyze.js - V45.0 改為使用 DeepSeek API
 
+// 確保 Vercel 環境變數中 DEEPSEEK_API_KEY 已設定
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
-// api/analyze.js - V44.0 最終穩定版 (使用 OpenAI 官方 SDK)
-
-// 導入 OpenAI SDK
-const OpenAI = require('openai'); 
-
-// 確保 Vercel 環境變數中 OPENAI_API_KEY 已設定
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY; 
-// 核心修正：升級到 gpt-4o 終結超時和格式不穩定的問題
-const FINAL_MODEL = 'gpt-4o'; 
-
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY, 
-});
+// 設定要使用的 DeepSeek 模型
+const DEEPSEEK_MODEL = 'deepseek-chat'; 
 
 const SYSTEM_PROMPT = "你是一位精通中國古代《神獸七十二型人格》理論的資深分析師。你的任務是根據用戶提供的『六獸-六親-地支』組合和情境，輸出深度且具體的分析報告。報告必須專業、嚴謹，並且字數至少 800 字。";
 
@@ -21,8 +13,8 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    if (!OPENAI_API_KEY) {
-        return res.status(500).json({ error: 'Server configuration error: OPENAI_API_KEY is missing.' });
+    if (!DEEPSEEK_API_KEY) {
+        return res.status(500).json({ error: 'Server configuration error: DEEPSEEK_API_KEY is missing.' });
     }
 
     try {
@@ -32,28 +24,44 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Missing required parameter: prompt.' });
         }
         
-        // 呼叫 OpenAI API
-        const completion = await openai.chat.completions.create({
-            model: FINAL_MODEL,
-            messages: [
-                {
-                    role: "system",
-                    content: SYSTEM_PROMPT,
-                },
-                {
-                    role: "user",
-                    content: prompt,
-                }
-            ],
-            temperature: 0.7,
-            max_tokens: 3000,
+        // 使用 fetch 呼叫 DeepSeek API
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: DEEPSEEK_MODEL,
+                messages: [
+                    {
+                        role: "system",
+                        content: SYSTEM_PROMPT,
+                    },
+                    {
+                        role: "user",
+                        content: prompt,
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 3000,
+            })
         });
+
+        // 檢查 API 回應是否成功
+        if (!response.ok) {
+            const errorData = await response.json();
+            // 拋出錯誤，讓下方的 catch 區塊捕捉
+            throw new Error(errorData.error.message || `API request failed with status ${response.status}`);
+        }
+
+        const completion = await response.json();
 
         // 成功響應
         res.status(200).json(completion);
 
     } catch (error) {
-        console.error("OpenAI API Error:", error.message || error);
+        console.error("DeepSeek API Error:", error.message || error);
         
         // 處理 API 請求失敗
         res.status(500).json({ 
